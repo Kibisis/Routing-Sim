@@ -150,6 +150,16 @@ class Router:
         prnt_str = "Router {self.id} is linked to {connected_routers} \n"
         return prnt_str
 
+    def __eq__(self, other):
+        for i, j in zip(self.links,other.links):
+            if i != j:
+                return False
+        for i, j in zip(self.queue, other.queue):
+            if i != j:
+                return False
+        return True
+
+
     # class Data:
     #     def __init__(self, dest, contents, size=1, type='Routes'):
     #         self.type = type
