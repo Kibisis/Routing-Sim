@@ -22,7 +22,7 @@ class NetTests(unittest.TestCase):
         pass
         """
 import Net
-n = Net.Network("Test3", 10)
+n = Net.Network("Test3", 3)
 A_router = n.routers[1]
 B_router = n.routers[2]
 aTObLink = n.connect(A_router, B_router)
