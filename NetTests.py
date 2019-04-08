@@ -1,0 +1,24 @@
+import unittest
+import Net
+
+class NetTests(unittest.TestCase):
+    def test_router_eq(self):
+        r1=Net.Router(0)
+        r2=Net.Router(0)
+        self.assertEqual(r1,r2,"Routers with the same id are the same router")
+
+    def test_link_eq(self):
+        n = Net.Network("Name", 2)
+        A = n.routers[1]
+        B = n.routers[2]
+        l = n.connect(A, B)
+        self.assertEqual(A, n.routers[A.id], "Network contains all member routers")
+        self.assertEqual(B, n.routers[B.id], "Network contains all member routers")
+        self.assertIn(l, A.links, "Router A should link to Router B")
+        self.assertIn(l, B.links, "Router B should link to Router A")
+        self.assertEqual(A.links,B.links, "Router A and B should contain the same link")
+
+
+
+if __name__ == '__main__':
+    unittest.main()
