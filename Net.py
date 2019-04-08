@@ -11,9 +11,10 @@ class Network:
             self.add_router()
 
     def add_router(self):
-        self.router_id+=1
         r = Router(self.router_id)
         self.routers[self.router_id] = r
+        self.router_id+=1
+
 
     def tick(self):
         if self.clock is 0:
