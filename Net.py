@@ -18,7 +18,8 @@ class Network:
     def tick(self):
         if self.clock is 0:
             for id,router in self.routers.items(): #add initial positioning to all routers
-                router.update([[self.clock, id, {id:0}], None])
+                if len(router.routes) is 0:
+                    router.update([[self.clock, id, {id:0}], None])
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
             router.process()
