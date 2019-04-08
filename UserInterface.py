@@ -17,7 +17,8 @@ class Location():
 #create routers
 def draw_routers(window):
     size = 100
-    locs = [ Location(150, 150, size), Location(300, 300, size), Location(150, 450, size), Location(450, 150, size), Location(450, 450, size) ]
+    locs = [Location(150, 150, size), Location(300, 300, size),
+            Location(150, 450, size), Location(450, 150, size), Location(450, 450, size) ]
 
     for loc in locs:
         window.create_rectangle(loc.x1, loc.y1, loc.x2, loc.y2, fill="blue")
@@ -26,7 +27,6 @@ def draw_routers(window):
 
 #create links
 def draw_link(root, net):
-
     window.create_line()
 
 
