@@ -18,6 +18,17 @@ class NetTests(unittest.TestCase):
         self.assertIn(l, B.links, "Router B should link to Router A")
         self.assertEqual(A.links,B.links, "Router A and B should contain the same link")
 
+    def test_initial_tick(self):
+        pass
+        """
+import Net
+n = Net.Network("Test3", 10)
+A_router = n.routers[1]
+B_router = n.routers[2]
+aTObLink = n.connect(A_router, B_router)
+n.tick()
+"""
+        assertTrue(aTObLink.data)
 
 
 if __name__ == '__main__':

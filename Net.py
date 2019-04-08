@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 class Network:
     clock = 0
     def __init__(self, name="Network", router_count=0):
@@ -15,10 +17,10 @@ class Network:
 
     def tick(self):
         if self.clock is 0:
-            for router in self.routers: #add initial positioning to all routers
-                router.update([[self.clock, router.id, {router.id:0}], None])
+            for id,router in self.routers.items(): #add initial positioning to all routers
+                router.update([[self.clock, id, {id:0}], None])
         self.clock+=1
-        for router in self.routers: #routers process data already present
+        for id, router in self.routers.items(): #routers process data already present
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
@@ -119,7 +121,7 @@ class Router:
         data = arr[0]
         link = arr[1]
         modified = False
-        for key,val in data[3]:
+        for key,val in data[2].items():
             if key in self.routes:
                 if val + 1 < self.routes[key][0]:
                     self.routes[key][0] = val+1
