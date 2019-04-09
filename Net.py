@@ -134,6 +134,10 @@ class Router:
     def found_shorter_path(self, cur_dist, new_dist):
         return new_dist + 1 < cur_dist
 
+    def update_table(self, router_id, link, new_dist):
+        self.routes[router_id][0] = new_dist
+        self.routes[router_id][1] = link
+
     def update(self,packet):#packet is a data object
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
@@ -143,8 +147,7 @@ class Router:
         for router_id, routing_info in packet.contents.items(): #router_id: str, routing_info: [dist, link]
             if router_id in self.routes:
                 if self.found_shorter_path(self.routes[router_id][0], routing_info[0]):
-                    self.routes[router_id][0] = routing_info[0]+1
-                    self.routes[router_id][1] = link
+                    self.update_table(router_id, link, routing_info[0] + 1)
                     modified = True
             else:
                 self.routes[router_id] =[routing_info[0] + 1, link]
