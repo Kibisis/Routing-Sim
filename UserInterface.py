@@ -10,9 +10,10 @@ import random
 from itertools import combinations
 
 network = Net.Network(name="Simulator", router_count=5)
+global_tree = None
 
 class Router():
-    def __init__(self, x1, y1, size, name, neighbors=[]):
+    def __init__(self, x1, y1, size, name, rno, neighbors=[]):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x1 + size
@@ -22,6 +23,7 @@ class Router():
         self.name = name
         self.neighbors = []
         self.neighbors_found = []
+        self.rno = rno
 
     def add_neighbors(self, routers):
         for r in routers:
@@ -45,11 +47,11 @@ class Router():
 #create routers
 def draw_routers(window, neighbor_array):
     size = 100
-    r0 = Router(150, 150, size, "r0")
-    r1 = Router(50, 300, size, "r1")
-    r2 = Router(150, 450, size, "r2")
-    r3 = Router(450, 225, size, "r3")
-    r4 = Router(450, 375, size, "r4")
+    r0 = Router(150, 150, size, "r0", 0)
+    r1 = Router(50, 300, size, "r1", 1)
+    r2 = Router(150, 450, size, "r2", 2)
+    r3 = Router(450, 225, size, "r3", 3)
+    r4 = Router(450, 375, size, "r4", 4)
     routers = [r0, r1, r2, r3, r4]
 
     for i in range(len(routers)):
@@ -106,6 +108,18 @@ def create_links(routers, links):
         #print(array)
     #print(indexes)
 
+def create_network(frontend_routers):
+    print("creating_network")
+    global network
+    backend_routers = network.routers
+    for f_router in frontend_routers:
+        for f_neighbor in f_router.neighbors:
+            idx1 = f_router.rno
+            idx2 = f_neighbor.rno
+            b_router1 = backend_routers[idx1]
+            b_router2 = backend_routers[idx2]
+            network.connect(b_router1, b_router2)
+
 
 def draw_tables(root, table_values):
     print("showing tables")
@@ -115,7 +129,7 @@ def draw_tables(root, table_values):
 
     #for j in range(len(routers)):
         #data[0][0].append(routers[i].name)
-    data = [ ["val1", "val2", "val3","|", "val4", "val5", "val6", "|", "val7", "val8", "val9"], ]
+    data = [ ["Dest", "Dist", "Next", "Dest", "Dist", "Next", "Dest", "Dist", "Next"], ]
 
 
     frame = Frame(root, width=800, height=200)
@@ -183,7 +197,8 @@ def draw_tables(root, table_values):
 
     tree.pack(side = 'left')
 
-
+    global global_tree
+    global_tree = tree
 
     return tree
 
@@ -198,16 +213,54 @@ def draw_canvas(neighbor_array):
     root = Tk()
     window = Canvas(root, width = 800, height = 800)
     window.grid()
-    routers,table_values = draw_routers(window, neighbor_array)
+    routers, table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
-    table = draw_tables(root, table_values)
+    tree = draw_tables(root, table_values)
+    create_network(routers)
     #table.insert('', 'end', values = ("a", "b", "c"))
     window.bind("<Left>", leftKey)
     window.bind("<Right>", rightKey)
     window.focus_set()
     window.pack()
     root.mainloop()
-    return Net.Network("canvas",settings.router)
+    return tree
+
+def update_table(new_state):
+    global global_tree
+    index = 0
+    found_data = True
+
+    # for i in global_tree.get_children():
+    #     print(i)
+    #     if int(i[-1]) > 1:
+    #         print("deleting")
+    #         global_tree.delete(i)
+
+    while found_data:
+        found_data = False
+        row = []
+        for idd, router in new_state.routers.items():
+            #print(len(router.routes), router.routes)
+            if index < len(router.routes):
+                destinations = list(router.routes.keys())
+                routes = list(router.routes.values())
+                #print(destinations, routes)
+                dest = destinations[index]
+                dist = routes[index][0]
+                link = routes[index][1]
+                if link == None:
+                    #print(dest, dist, link)
+                    row.extend([dest, dist, link])
+                else:
+                    #print(dest, dist, link.pointB.id)
+                    row.extend([dest, dist, link.pointB.id])
+                found_data = True
+            else:
+                row.extend(['', '', ''])
+        print(row)
+        global_tree.insert('', 'end', values=row)
+        index += 1
+
 
 ## handling ticks
 def handle_press(event):
@@ -220,7 +273,10 @@ def rightKey(event):
     print("Right key pressed")
     global network
     new_state = network.tick()
-    print(new_state.routers)
+    for idd,router in new_state.routers.items():
+        print(idd, router.routes)
+
+    update_table(new_state)
 
 
 def main():
@@ -234,7 +290,7 @@ def main():
             help='Number of links')
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
-    draw_canvas(neighbor_array)
+    tree = draw_canvas(neighbor_array)
 
     # while True:
     #     handle_press()

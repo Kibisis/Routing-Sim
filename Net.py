@@ -7,7 +7,6 @@ past_networks = {}
 
 class Network:
     clock = 0
-
     def __init__(self, name="Network", router_count=0):
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
@@ -32,6 +31,15 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
+        # for router_id, router in self.routers.items():
+        #     print(router)
+        #     for link in router.links:
+        #         print(link)
+        #     for datum in router.queue:
+        #         print(datum.source)
+        print()
+        print("-"*30, "\n", self, "\n", "-"*30)
+        print()
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -54,6 +62,12 @@ class Network:
                 self.connect(s,d,l,ll)
 
     def connect(self, l_router, r_router, link_speed=1, link_length=1, capacity=None):
+        for i in l_router.links:
+            if r_router in i.ends and l_router in i.ends:
+                return None
+        for i in r_router.links:
+            if r_router in i.ends and l_router in i.ends:
+                return None
         link = Link(l_router,r_router,link_speed,link_length,capacity)
         self.links.add(link)
         l_router.links.add(link)
@@ -128,7 +142,7 @@ class Router:
     #indexes into routing info list
     DISTANCE = 0
     LINK = 1
-    
+
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
@@ -168,10 +182,11 @@ class Router:
                 self.broadcast()
 
     def broadcast(self): #send <dest, distance> out along all links
+        #print("broadcasting, length of links:", len(self.links))
         for link in self.links:
-
             pack = Data(Network.clock, self, None, self.routes, link)
             link.send(pack)
+            #print("boradcasting from:", self, link)
 
     def receive(self, packet):
         self.queue.append(packet)
@@ -184,13 +199,7 @@ class Router:
         return prnt_str
 
     def __eq__(self, other):
-        for i, j in zip(self.links,other.links):
-            if i != j:
-                return False
-        for i, j in zip(self.queue, other.queue):
-            if i != j:
-                return False
-        return True
+        return self.id is other.id
 
 
 class Data:
