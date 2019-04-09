@@ -22,8 +22,6 @@ class NetTests(unittest.TestCase):
         self.assertEqual(A.links,B.links, "Router A and B should contain the same link")
 
     def test_initial_tick(self):
-        pass
-        import Net
         n = Net.Network("Test3", 5)
         A_router = n.routers[0]
         B_router = n.routers[1]
