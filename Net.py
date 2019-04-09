@@ -1,7 +1,13 @@
 #!/usr/bin/python3
 
+import copy
+import Queue
+
+past_networks = {}
+
 class Network:
     clock = 0
+
     def __init__(self, name="Network", router_count=0):
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
@@ -15,12 +21,13 @@ class Network:
         self.routers[self.router_id] = r
         self.router_id+=1
 
-
     def tick(self):
         if self.clock is 0:
+            print("Clock was 0, routers populating")
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
-                    router.update([[self.clock, id, {id:0}], None])
+                    d=Data(0, router, router, None, {id:0})
+                    router.receive(d)
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
             router.process()
@@ -56,11 +63,18 @@ class Network:
 
     @staticmethod
     def run(net):
+        past_networks[Network.clock] = copy.deepcopy(net)
         yield net.tick()
 
     def __str__(self):
-        str = "Network {}: \n Routers: \t {}".format(self.name, self.routers)
-        return str
+        router_str = ""
+        link_str = ""
+        net_str = "Network {}: \n".format(self.name) + "-"*20
+        for id, router in self.routers.items():
+            router_str += "\nRouter {}: \t {}".format(id, router.__str__())
+        for link in self.links:
+            link_str += "\n{}".format(link.__str__())
+        return net_str + router_str + link_str
 
 
 class Link:
@@ -69,7 +83,7 @@ class Link:
         self.speed = speed  # allows for duplicate links higher throughput
         self.length = length
         self.capacity = capacity
-        self.data = []  # format - [arrival_time, dest, data]
+        self.data = []  # queue of Data objects
         self.ends = [pointA, pointB]
         # check to make sure that links don't already exist, prevents duplicates
         if not self in self.ends[0].links:
@@ -80,22 +94,24 @@ class Link:
     def tick(self, clock):  # pump data forward
         i = 0
         data = self.data
-        routers_reached = set()
+        # routers_reached = set()
         while i < len(data):
-            if data[i][0] >= clock:  # data has arrived at it's destination
-                routers_reached.add(data[i][2])
-                data[i][2].queue.put(data, self)
-                data.remove(i)
+            if data[i].time >= clock:  # data has arrived at it's destination
+                # routers_reached.add(data[i][2])
+                data[i].destination.queue.append(data[i])
+                data.pop(i)
+                continue #keeps index the same so nothing is skipped
             i += 1
-        return routers_reached
+        # return routers_reached
 
-    def send(self, route_table, source):
+    def send(self, packet):
         travel_time = self.length
-        if source is self.ends[0]:
-            dest = self.ends[1]
+        if packet.source is self.ends[0]:
+            packet.destination = self.ends[1]
         else:
-            dest = self.ends[0]
-        self.data += [Network.clock + travel_time, dest, route_table]
+            packet.destination = self.ends[0]
+        packet.time = travel_time + Network.clock
+        self.data.append(packet)
 
     def __eq__(self, lhs):
         return ((lhs.pointA is self.ends[1]) and (lhs.pointB is self.ends[0])) or (
@@ -105,26 +121,26 @@ class Link:
         return id(self)
 
     def __str__(self):
-        str = "{} is connected to {} \nlength: {self.length}\n speed:{}\n".format(self.ends[0].id, self.ends[1].id,self.speed)
-        return str
+        str = "Router {} is connected to Router {}-----length: {}".format(self.ends[0].id, self.ends[1].id,self.length)
+        contents = "\nContains: {}".format(self.data)
+        return str+contents
 
 
 class Router:
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
-        self.routes = {} #dest: distance,link
-        self.queue = [] #other <dest, [dist, link]> dictionaries in the order of arrival
+        self.routes = {} #dest_id: distance,link
+        self.queue = [] #Data objects in the order of arrival
 
-    def update(self,arr):#Arr is [data, link transmitting]
+    def update(self,packet):#packet is a data object
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
                          #Queue simulates buildup of data, bottlenecks, etc
-        data = arr[0]
-        link = arr[1]
+        link = packet.link
         modified = False
-        for key,val in data[2].items():
-            if key in self.routes:
+        for key,val in packet.contents.items():
+            if key in self.routes.keySet():
                 if val + 1 < self.routes[key][0]:
                     self.routes[key][0] = val+1
                     self.routes[key][1] = link
@@ -136,22 +152,23 @@ class Router:
 
     def process(self): #check the next batch of routes in the queue
         if len(self.queue) > 0:
-            modified = self.update(self.queue.get())
+            modified = self.update(self.queue.pop(0))
             if modified:
                 self.broadcast()
 
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
-            link.send(self.routes, self)
+            pack = Data(clock, self, None, link, self.routes)
+            link.send(copy.deepcopy(self.routes), self) #TODO may need to change this to a Data object
 
-    def receive(self, data):
-        self.queue.put(data)
+    def receive(self, packet):
+        self.queue.append(packet)
 
     def __str__(self):
         connected_routers = []
         for i in self.links:
             connected_routers.append(i.ends[0].id if i.ends[1].id is self.id else i.ends[1].id)
-        prnt_str = "Router {} is linked to {} \n".format(self.id,connected_routers)
+        prnt_str = "Router {} is linked to {} \n Table: {}".format(self.id,connected_routers,self.routes)
         return prnt_str
 
     def __eq__(self, other):
@@ -164,12 +181,15 @@ class Router:
         return True
 
 
-    # class Data:
-    #     def __init__(self, dest, contents, size=1, type='Routes'):
-    #         self.type = type
-    #         self.destination = dest
-    #         self.contents = contents
-    #         self.size = size
+class Data:
+    def __init__(self, time, source, dest, contents, link, type='Routes'):
+        self.type = type
+        self.time = time
+        self.destination = dest
+        self.source = source
+        self.contents = contents
+        self.size = size
+        self.link = link
 
 
 def build_from_file(fname):

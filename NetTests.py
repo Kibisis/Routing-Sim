@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+
 import unittest
 import Net
 
@@ -20,16 +23,22 @@ class NetTests(unittest.TestCase):
 
     def test_initial_tick(self):
         pass
-        """
-import Net
-n = Net.Network("Test3", 3)
-A_router = n.routers[1]
-B_router = n.routers[2]
-aTObLink = n.connect(A_router, B_router)
-n.tick()
-"""
-        # assertTrue(aTObLink.data)
+        import Net
+        n = Net.Network("Test3", 5)
+        A_router = n.routers[0]
+        B_router = n.routers[1]
+        C_router = n.routers[2]
+        D_router = n.routers[3]
+        E_router = n.routers[4]
 
+        aTOcLink = n.connect(A_router,C_router)
+        dTOcLink = n.connect(D_router,C_router)
+        bTOcLink = n.connect(B_router,C_router)
+        eTOcLink = n.connect(E_router,C_router)
+
+        for i in range(10):
+            n.tick()
+        print(n)
 
 if __name__ == '__main__':
     unittest.main()
