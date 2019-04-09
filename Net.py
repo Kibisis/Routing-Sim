@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import copy
 import Queue
 
 class Network:
@@ -22,7 +23,8 @@ class Network:
             print("Clock was 0, routers populating")
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
-                    router.receive([[0, router, {id:0}], None])
+                    d=Data(0, router, router, None, {id:0})
+                    router.receive(d)
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
             router.process()
@@ -77,7 +79,7 @@ class Link:
         self.speed = speed  # allows for duplicate links higher throughput
         self.length = length
         self.capacity = capacity
-        self.data = []  # format - [arrival_time, dest, data]
+        self.data = []  # queue of Data objects
         self.ends = [pointA, pointB]
         # check to make sure that links don't already exist, prevents duplicates
         if not self in self.ends[0].links:
@@ -88,22 +90,24 @@ class Link:
     def tick(self, clock):  # pump data forward
         i = 0
         data = self.data
-        routers_reached = set()
+        # routers_reached = set()
         while i < len(data):
-            if data[i][0] >= clock:  # data has arrived at it's destination
+            if data[i].time >= clock:  # data has arrived at it's destination
                 # routers_reached.add(data[i][2])
-                data[i][1].queue.append([data, self])
+                data[i].destination.queue.append(data[i])
                 data.pop(i)
+                continue #keeps index the same so nothing is skipped
             i += 1
         # return routers_reached
 
-    def send(self, route_table, source):
+    def send(self, packet):
         travel_time = self.length
-        if source is self.ends[0]:
-            dest = self.ends[1]
+        if packet.source is self.ends[0]:
+            packet.destination = self.ends[1]
         else:
-            dest = self.ends[0]
-        self.data.append([Network.clock + travel_time, dest, route_table])
+            packet.destination = self.ends[0]
+        packet.time = travel_time + Network.clock
+        self.data.append(packet)
 
     def __eq__(self, lhs):
         return ((lhs.pointA is self.ends[1]) and (lhs.pointB is self.ends[0])) or (
@@ -114,25 +118,25 @@ class Link:
 
     def __str__(self):
         str = "Router {} is connected to Router {}-----length: {}".format(self.ends[0].id, self.ends[1].id,self.length)
-        return str
+        contents = "\nContains: {}".format(self.data)
+        return str+contents
 
 
 class Router:
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
-        self.routes = {} #dest: distance,link
-        self.queue = [] #other <dest, [dist, link]> dictionaries in the order of arrival
+        self.routes = {} #dest_id: distance,link
+        self.queue = [] #Data objects in the order of arrival
 
-    def update(self,arr):#Arr is [data, link transmitting]
+    def update(self,packet):#packet is a data object
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
                          #Queue simulates buildup of data, bottlenecks, etc
-        data = arr[0]
-        link = arr[1]
+        link = packet.link
         modified = False
-        for key,val in data[2].items():
-            if key in self.routes:
+        for key,val in packet.contents.items():
+            if key in self.routes.keySet():
                 if val + 1 < self.routes[key][0]:
                     self.routes[key][0] = val+1
                     self.routes[key][1] = link
@@ -150,10 +154,11 @@ class Router:
 
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
-            link.send(self.routes, self)
+            pack = Data(clock, self, None, link, self.routes)
+            link.send(self.routes.deepcopy(), self) #TODO may need to change this to a Data object
 
-    def receive(self, arr):
-        self.queue.append(arr)
+    def receive(self, packet):
+        self.queue.append(packet)
 
     def __str__(self):
         connected_routers = []
@@ -175,6 +180,7 @@ class Router:
 class Data:
     def __init__(self, time, source, dest, contents, link, type='Routes'):
         self.type = type
+        self.time = time
         self.destination = dest
         self.source = source
         self.contents = contents
