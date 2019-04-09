@@ -8,8 +8,8 @@ import math
 from argparse import ArgumentParser
 import random
 from itertools import combinations
-from tkintertable import TableCanvas, TableModel
-import tkintertable
+
+network = Net.Network(name="Simulator", router_count=5)
 
 class Router():
     def __init__(self, x1, y1, size, name, neighbors=[]):
@@ -109,17 +109,6 @@ def create_links(routers, links):
 
 def draw_tables(root, table_values):
     print("showing tables")
-#     window = Frame(root, width = 800, height = 100)
-#     window.pack()
-#     table = TableCanvas(window, data=table_values, cellwidth=15)
-#     #header_row =
-# #    tablecolheader = tkintertable.ColumnHeader(table.parentframe, table)
-#     #table.addRow grid(row=0,column=0,rowspan=1,columnspan=3,sticky='news')
-#     #table.createTableFrame()
-#     table.show()
-#     #window.pack()
-#     #root.mainloop()
-#     return
 
     #data = [[]]
     #for i in range(len(routers)):
@@ -198,6 +187,9 @@ def leftKey(event):
 
 def rightKey(event):
     print("Right key pressed")
+    global network
+    new_state = network.tick()
+    print(new_state.routers)
 
 
 
@@ -213,6 +205,7 @@ def main():
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
     draw_canvas(neighbor_array)
+
     # while True:
     #     handle_press()
 
