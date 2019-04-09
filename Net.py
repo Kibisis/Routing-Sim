@@ -7,7 +7,6 @@ past_networks = {}
 
 class Network:
     clock = 0
-
     def __init__(self, name="Network", router_count=0):
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
@@ -32,8 +31,12 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
-        for router in self.routers:
+        for router_id, router in self.routers.items():
             print(router)
+            for link in router.links:
+                print(link)
+            for datum in router.queue:
+                print(datum.source)
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -57,7 +60,7 @@ class Network:
 
     def connect(self, l_router, r_router, link_speed=1, link_length=1, capacity=None):
         for i in l_router.links:
-            if i.pointA is r_router or i.pointB is r_router:
+            if r_router in i.ends and l_router in i.ends:
                 return None
         link = Link(l_router,r_router,link_speed,link_length,capacity)
         self.links.add(link)
