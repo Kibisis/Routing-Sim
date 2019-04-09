@@ -10,6 +10,7 @@ import random
 from itertools import combinations
 
 network = Net.Network(name="Simulator", router_count=5)
+global_tree = None 
 
 class Router():
     def __init__(self, x1, y1, size, name, rno, neighbors=[]):
@@ -128,7 +129,7 @@ def draw_tables(root, table_values):
 
     #for j in range(len(routers)):
         #data[0][0].append(routers[i].name)
-    data = [ ["val1", "val2", "val3", "val4", "val5", "val6", "val7", "val8", "val9"], ]
+    data = [ ["Dest", "Dist", "Next", "Dest", "Dist", "Next", "Dest", "Dist", "Next"], ]
 
 
     frame = Frame(root, width=800, height=200)
@@ -162,6 +163,9 @@ def draw_tables(root, table_values):
         tree.insert('', 'end', values = (val) )
     tree.pack(side = 'left')
 
+    global global_tree
+    global_tree = tree 
+
     return tree
 
 def start_communication(source, dest):
@@ -177,7 +181,7 @@ def draw_canvas(neighbor_array):
     window.grid()
     routers, table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
-    table = draw_tables(root, table_values)
+    tree = draw_tables(root, table_values)
     create_network(routers)
     #table.insert('', 'end', values = ("a", "b", "c"))
     window.bind("<Left>", leftKey)
@@ -185,7 +189,44 @@ def draw_canvas(neighbor_array):
     window.focus_set()
     window.pack()
     root.mainloop()
-    return routers
+    return tree
+
+def update_table(new_state):
+    global global_tree
+    index = 0
+    found_data = True
+
+    # for i in global_tree.get_children():
+    #     print(i)
+    #     if int(i[-1]) > 1:
+    #         print("deleting")
+    #         global_tree.delete(i)
+
+    while found_data:
+        found_data = False
+        row = []
+        for idd, router in new_state.routers.items():
+            #print(len(router.routes), router.routes)
+            if index < len(router.routes):
+                destinations = list(router.routes.keys())
+                routes = list(router.routes.values())
+                #print(destinations, routes)
+                dest = destinations[index]
+                dist = routes[index][0]
+                link = routes[index][1]
+                if link == None:
+                    #print(dest, dist, link)
+                    row.extend([dest, dist, link])
+                else:
+                    #print(dest, dist, link.pointB.id)
+                    row.extend([dest, dist, link.pointB.id])
+                found_data = True
+            else:
+                row.extend(['', '', ''])
+        print(row)
+        global_tree.insert('', 'end', values=row)
+        index += 1
+
 
 ## handling ticks
 def handle_press(event):
@@ -199,8 +240,9 @@ def rightKey(event):
     global network
     new_state = network.tick()
     for idd,router in new_state.routers.items():
-        #print(idd, router.routes)
-        blah = 0
+        print(idd, router.routes)
+
+    update_table(new_state)
 
 
 
@@ -215,7 +257,7 @@ def main():
             help='Number of links')
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
-    routers = draw_canvas(neighbor_array)
+    tree = draw_canvas(neighbor_array)
 
     # while True:
     #     handle_press()
