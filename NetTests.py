@@ -30,7 +30,7 @@ class NetTests(unittest.TestCase):
         C_router = n.routers[2]
         D_router = n.routers[3]
         E_router = n.routers[4]
-
+        print("A{}\nB{}\nC{}\nD{},E{}".format(A_router.id,B_router.id,C_router.id,D_router.id,E_router.id))
         aTOcLink = n.connect(A_router,C_router)
         dTOcLink = n.connect(D_router,C_router)
         bTOcLink = n.connect(B_router,C_router)

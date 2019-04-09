@@ -25,7 +25,7 @@ class Network:
         if self.clock is 0:
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
-                    d=Data(0, router, router, {id:[0,None]}, None)
+                    d=Data(0, router, router, {id:[-1,None]}, None)
                     router.receive(d)
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
