@@ -109,19 +109,13 @@ def create_links(routers, links):
 
 def draw_tables(root, table_values):
     print("showing tables")
-
     #data = [[]]
     #for i in range(len(routers)):
     #    data.append([])
 
     #for j in range(len(routers)):
         #data[0][0].append(routers[i].name)
-    data = [ ["val1", "val2", "val3", "val4", "val5", "val6", "val7", "val8", "val9"],
-         ["asd1", "asd2", "asd3"],
-         ["bbb1", "bbb3", "bbb4"],
-         ["ccc1", "ccc3", "ccc4"],
-         ["ddd1", "ddd3", "ddd4"],
-         ["eee1", "eee3", "eee4"] ]
+    data = [ ["val1", "val2", "val3", "val4", "val5", "val6", "val7", "val8", "val9"], ]
 
 
     frame = Frame(root, width=800, height=200)
@@ -134,7 +128,7 @@ def draw_tables(root, table_values):
     tree.heading(5, text="Router 1")
     tree.heading(8, text="Router 2")
 
-    tree.column(1, width = 100, background = "grey")
+    tree.column(1, width = 100)
     tree.column(2, width = 100)
     tree.column(3, width = 100)
     tree.column(4, width = 100)
@@ -151,7 +145,8 @@ def draw_tables(root, table_values):
     tree.configure(yscrollcommand=scroll.set)
 
     for val in data:
-        tree.insert('', 'end', values = (val[0], val[1], val[2]) )
+        #for input in val:
+        tree.insert('', 'end', values = (val) )
     tree.pack(side = 'left')
 
     return tree
