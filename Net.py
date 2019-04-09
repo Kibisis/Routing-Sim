@@ -125,6 +125,10 @@ class Link:
 
 
 class Router:
+    #indexes into routing info list
+    DISTANCE = 0
+    LINK = 1
+    
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
@@ -135,8 +139,8 @@ class Router:
         return new_dist + 1 < cur_dist
 
     def update_shortest_path(self, router_id, link, new_dist):
-        self.routes[router_id][0] = new_dist
-        self.routes[router_id][1] = link
+        self.routes[router_id][Router.DISTANCE] = new_dist
+        self.routes[router_id][Router.LINK] = link
 
     def add_new_router(self, router_id, distance, link):
         self.routes[router_id] =[distance, link]
@@ -149,11 +153,11 @@ class Router:
         modified = False
         for router_id, routing_info in packet.contents.items(): #router_id: str, routing_info: [dist, link]
             if router_id in self.routes:
-                if self.found_shorter_path(self.routes[router_id][0], routing_info[0]):
-                    self.update_shortest_path(router_id, link, routing_info[0] + 1)
+                if self.found_shorter_path(self.routes[router_id][Router.DISTANCE], routing_info[Router.DISTANCE]):
+                    self.update_shortest_path(router_id, link, routing_info[Router.DISTANCE] + 1)
                     modified = True
             else:
-                self.add_new_router(router_id, routing_info[0] + 1, link)
+                self.add_new_router(router_id, routing_info[Router.DISTANCE] + 1, link)
                 modified = True
         return modified
 
