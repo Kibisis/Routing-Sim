@@ -140,14 +140,14 @@ class Router:
                          #Queue simulates buildup of data, bottlenecks, etc
         link = packet.link
         modified = False
-        for key,val in packet.contents.items():
-            if key in self.routes:
-                if val + 1 < self.routes[key][0]:
-                    self.routes[key][0] = val+1
-                    self.routes[key][1] = link
+        for router_id, routing_info in packet.contents.items():
+            if router_id in self.routes:
+                if routing_info[0] + 1 < self.routes[router_id][0]:
+                    self.routes[router_id][0] = routing_info[0]+1
+                    self.routes[router_id][1] = link
                     modified = True
             else:
-                self.routes[key] =[val[0] + 1, link]
+                self.routes[router_id] =[routing_info[0] + 1, link]
                 modified = True
         return modified
 
@@ -159,6 +159,7 @@ class Router:
 
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
+
             pack = Data(Network.clock, self, None, copy.deepcopy(self.routes), link)
             link.send(pack)
 
