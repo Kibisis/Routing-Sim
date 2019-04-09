@@ -61,8 +61,7 @@ class Network:
         r_router.links.add(link)
         return link
 
-    @staticmethod
-    def run(net):
+    def run(self):
         past_networks[Network.clock] = copy.deepcopy(net)
         yield net.tick()
 
@@ -131,7 +130,7 @@ class Router:
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
-        self.routes = {} #dest_id: distance,link
+        self.routes = {} #dest_id: [distance,link]
         self.queue = [] #Data objects in the order of arrival
 
     def update(self,packet):#packet is a data object
@@ -142,6 +141,7 @@ class Router:
         link = packet.link
         modified = False
         for key,val in packet.contents.items():
+            print("Key {} and Val {}".format(key, val))
             if key in self.routes:
                 if val + 1 < self.routes[key][0]:
                     self.routes[key][0] = val+1
@@ -160,8 +160,8 @@ class Router:
 
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
-            pack = Data(Network.clock, self, None, self.routes, link)
-            link.send(copy.deepcopy(self.routes)) #TODO may need to change this to a Data object
+            pack = Data(Network.clock, self, None, copy.deepcopy(self.routes), link)
+            link.send(pack)
 
     def receive(self, packet):
         self.queue.append(packet)
