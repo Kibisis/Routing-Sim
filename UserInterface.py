@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 import random
 from itertools import combinations
 from tkintertable import TableCanvas, TableModel
+import tkintertable
 
 class Router():
     def __init__(self, x1, y1, size, name, neighbors=[]):
@@ -20,15 +21,26 @@ class Router():
         self.y_mid = (y1 + y1 + size)/2
         self.name = name
         self.neighbors = []
+        self.neighbors_found = []
 
     def add_neighbors(self, routers):
         for r in routers:
             self.neighbors.append(r)
 
+    def add_neighbors_found(self, routers):
+        for r in routers:
+            self.neighbors_found.append(r)
+
     def print_neighbors(self):
         print("Router: " + str(self.name) + " has neighbors: ", end = '')
         for router in self.neighbors:
             print(str(router.name) + " ", end = '')
+
+    def print_neighbors_found(self):
+        print("Router: " + str(self.name) + " has found neighbors: ", end = '')
+        for router in self.neighbors_found:
+            print(str(router.name) + " ", end = '')
+
 
 #create routers
 def draw_routers(window, neighbor_array):
@@ -62,7 +74,9 @@ def draw_routers(window, neighbor_array):
 
     # create table values
 
-    table_values = {'row0':{'r0_':'Dest','r0__':'Dist',' r0___':'Next','r1_':'Dest','r1__':'Dist',' r1___':'Next'}}
+    table_values = {'row0':{'r0':'Dest','r0 ':'Dist','r0  ':'Next','r1':'Dest','r1 ':'Dist',' r1  ':'Next',
+                            'r2':'Dest','r2 ':'Dist','r2  ':'Next','r3':'Dest','r3 ':'Dist',' r3  ':'Next',
+                            'r4':'Dest','r4 ':'Dist','r4  ':'Next'}}
                     #'row1':{}}
     return (routers, table_values)
 
@@ -93,16 +107,65 @@ def create_links(routers, links):
     #print(indexes)
 
 
-def draw_tables(table_values):
+def draw_tables(root, table_values):
     print("showing tables")
-    root = Tk()
-    window = Canvas(root, width = 400, height = 100)
-    table = TableCanvas(window, data=table_values, cellwidth=15)
-    table.createTableFrame()
-    table.show()
-    window.pack()
-    root.mainloop()
-    return
+#     window = Frame(root, width = 800, height = 100)
+#     window.pack()
+#     table = TableCanvas(window, data=table_values, cellwidth=15)
+#     #header_row =
+# #    tablecolheader = tkintertable.ColumnHeader(table.parentframe, table)
+#     #table.addRow grid(row=0,column=0,rowspan=1,columnspan=3,sticky='news')
+#     #table.createTableFrame()
+#     table.show()
+#     #window.pack()
+#     #root.mainloop()
+#     return
+
+    #data = [[]]
+    #for i in range(len(routers)):
+    #    data.append([])
+
+    #for j in range(len(routers)):
+        #data[0][0].append(routers[i].name)
+    data = [ ["val1", "val2", "val3", "val4", "val5", "val6", "val7", "val8", "val9"],
+         ["asd1", "asd2", "asd3"],
+         ["bbb1", "bbb3", "bbb4"],
+         ["ccc1", "ccc3", "ccc4"],
+         ["ddd1", "ddd3", "ddd4"],
+         ["eee1", "eee3", "eee4"] ]
+
+
+    frame = Frame(root, width=800, height=200)
+    frame.pack()
+
+    tree = ttk.Treeview(frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 5, show = "headings")
+    tree.grid (row = 0, column = 1, columnspan = 3)
+
+    tree.heading(2, text="Router 0")
+    tree.heading(5, text="Router 1")
+    tree.heading(8, text="Router 2")
+
+    tree.column(1, width = 100, background = "grey")
+    tree.column(2, width = 100)
+    tree.column(3, width = 100)
+    tree.column(4, width = 100)
+    tree.column(5, width = 100)
+    tree.column(6, width = 100)
+    tree.column(7, width = 100)
+    tree.column(8, width = 100)
+    tree.column(9, width = 100)
+
+
+    scroll = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    scroll.pack(side = 'right', fill = 'y')
+
+    tree.configure(yscrollcommand=scroll.set)
+
+    for val in data:
+        tree.insert('', 'end', values = (val[0], val[1], val[2]) )
+    tree.pack(side = 'left')
+
+    return tree
 
 def start_communication(source, dest):
     window.create_line(source.x_mid, source.y_mid, dest.x_mid, dest.y_mid, fill="green")
@@ -117,14 +180,25 @@ def draw_canvas(neighbor_array):
     window.grid()
     routers,table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
-    draw_tables(table_values)
+    table = draw_tables(root, table_values)
+    #table.insert('', 'end', values = ("a", "b", "c"))
+    window.bind("<Left>", leftKey)
+    window.bind("<Right>", rightKey)
+    window.focus_set()
     window.pack()
     root.mainloop()
     return Net.Network("canvas",settings.router)
 
-## handling moving shapes
-def handle_press():
-    None
+## handling ticks
+def handle_press(event):
+    print("pressed", repr(event.char))
+
+def leftKey(event):
+    print("Left key pressed")
+
+def rightKey(event):
+    print("Right key pressed")
+
 
 
 def main():
@@ -139,6 +213,8 @@ def main():
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
     draw_canvas(neighbor_array)
+    # while True:
+    #     handle_press()
 
 
 if __name__ == '__main__':
