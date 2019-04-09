@@ -32,6 +32,8 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
+        for router in self.routers:
+            print(router)
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -54,6 +56,9 @@ class Network:
                 self.connect(s,d,l,ll)
 
     def connect(self, l_router, r_router, link_speed=1, link_length=1, capacity=None):
+        for i in l_router.links:
+            if i.pointA is r_router or i.pointB is r_router:
+                return None
         link = Link(l_router,r_router,link_speed,link_length,capacity)
         self.links.add(link)
         l_router.links.add(link)
@@ -128,7 +133,7 @@ class Router:
     #indexes into routing info list
     DISTANCE = 0
     LINK = 1
-    
+
     def __init__(self, id, links=None):
         self.id = id
         self.links = links or set() #{links attached}
