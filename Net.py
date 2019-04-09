@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import Queue
+
 class Network:
     clock = 0
     def __init__(self, name="Network", router_count=0):
@@ -15,12 +17,12 @@ class Network:
         self.routers[self.router_id] = r
         self.router_id+=1
 
-
     def tick(self):
         if self.clock is 0:
+            print("Clock was 0, routers populating")
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
-                    router.update([[self.clock, id, {id:0}], None])
+                    router.receive([[0, router, {id:0}], None])
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
             router.process()
@@ -59,8 +61,14 @@ class Network:
         yield net.tick()
 
     def __str__(self):
-        str = "Network {}: \n Routers: \t {}".format(self.name, self.routers)
-        return str
+        router_str = ""
+        link_str = ""
+        net_str = "Network {}: \n".format(self.name) + "-"*20
+        for id, router in self.routers.items():
+            router_str += "\nRouter {}: \t {}".format(id, router.__str__())
+        for link in self.links:
+            link_str += "\n{}".format(link.__str__())
+        return net_str + router_str + link_str
 
 
 class Link:
@@ -83,11 +91,11 @@ class Link:
         routers_reached = set()
         while i < len(data):
             if data[i][0] >= clock:  # data has arrived at it's destination
-                routers_reached.add(data[i][2])
-                data[i][2].queue.put(data, self)
-                data.remove(i)
+                # routers_reached.add(data[i][2])
+                data[i][1].queue.append([data, self])
+                data.pop(i)
             i += 1
-        return routers_reached
+        # return routers_reached
 
     def send(self, route_table, source):
         travel_time = self.length
@@ -95,7 +103,7 @@ class Link:
             dest = self.ends[1]
         else:
             dest = self.ends[0]
-        self.data += [Network.clock + travel_time, dest, route_table]
+        self.data.append([Network.clock + travel_time, dest, route_table])
 
     def __eq__(self, lhs):
         return ((lhs.pointA is self.ends[1]) and (lhs.pointB is self.ends[0])) or (
@@ -105,7 +113,7 @@ class Link:
         return id(self)
 
     def __str__(self):
-        str = "{} is connected to {} \nlength: {self.length}\n speed:{}\n".format(self.ends[0].id, self.ends[1].id,self.speed)
+        str = "Router {} is connected to Router {}-----length: {}".format(self.ends[0].id, self.ends[1].id,self.length)
         return str
 
 
@@ -136,7 +144,7 @@ class Router:
 
     def process(self): #check the next batch of routes in the queue
         if len(self.queue) > 0:
-            modified = self.update(self.queue.get())
+            modified = self.update(self.queue.pop(0))
             if modified:
                 self.broadcast()
 
@@ -144,14 +152,14 @@ class Router:
         for link in self.links:
             link.send(self.routes, self)
 
-    def receive(self, data):
-        self.queue.put(data)
+    def receive(self, arr):
+        self.queue.append(arr)
 
     def __str__(self):
         connected_routers = []
         for i in self.links:
             connected_routers.append(i.ends[0].id if i.ends[1].id is self.id else i.ends[1].id)
-        prnt_str = "Router {} is linked to {} \n".format(self.id,connected_routers)
+        prnt_str = "Router {} is linked to {} \n Table: {}".format(self.id,connected_routers,self.routes)
         return prnt_str
 
     def __eq__(self, other):
@@ -164,12 +172,13 @@ class Router:
         return True
 
 
-    # class Data:
-    #     def __init__(self, dest, contents, size=1, type='Routes'):
-    #         self.type = type
-    #         self.destination = dest
-    #         self.contents = contents
-    #         self.size = size
+class Data:
+    def __init__(self, time, source, dest, contents, type='Routes'):
+        self.type = type
+        self.destination = dest
+        self.source = source
+        self.contents = contents
+        self.size = size
 
 
 def build_from_file(fname):
