@@ -173,12 +173,13 @@ class Router:
 
 
 class Data:
-    def __init__(self, time, source, dest, contents, type='Routes'):
+    def __init__(self, time, source, dest, contents, link, type='Routes'):
         self.type = type
         self.destination = dest
         self.source = source
         self.contents = contents
         self.size = size
+        self.link = link
 
 
 def build_from_file(fname):
