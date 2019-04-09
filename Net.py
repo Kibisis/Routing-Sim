@@ -22,6 +22,7 @@ class Network:
         self.router_id+=1
 
     def tick(self):
+        print("TICK TOCK")
         if self.clock is 0:
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
@@ -29,8 +30,10 @@ class Network:
                     router.receive(d)
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
+            print("for id {}, router".format(id))
             router.process()
         for link in self.links: #pumps data forward
+            print("link")
             link.tick(self.clock)
         return self
 
