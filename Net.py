@@ -160,7 +160,7 @@ class Router:
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
 
-            pack = Data(Network.clock, self, None, copy.deepcopy(self.routes), link)
+            pack = Data(Network.clock, self, None, self.routes, link)
             link.send(pack)
 
     def receive(self, packet):
