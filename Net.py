@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import copy
-import Queue
+import queue
 
 past_networks = {}
 
