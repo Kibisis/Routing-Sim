@@ -36,7 +36,7 @@ class NetTests(unittest.TestCase):
         bTOcLink = n.connect(B_router,C_router)
         eTOcLink = n.connect(E_router,C_router)
 
-        for i in range(10):
+        for i in range(100):
             n.tick()
         print(n)
 
