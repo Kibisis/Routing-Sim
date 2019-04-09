@@ -31,12 +31,15 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
-        for router_id, router in self.routers.items():
-            print(router)
-            for link in router.links:
-                print(link)
-            for datum in router.queue:
-                print(datum.source)
+        # for router_id, router in self.routers.items():
+        #     print(router)
+        #     for link in router.links:
+        #         print(link)
+        #     for datum in router.queue:
+        #         print(datum.source)
+        print()
+        print("-"*30, "\n", self, "\n", "-"*30)
+        print()
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -60,6 +63,9 @@ class Network:
 
     def connect(self, l_router, r_router, link_speed=1, link_length=1, capacity=None):
         for i in l_router.links:
+            if r_router in i.ends and l_router in i.ends:
+                return None
+        for i in r_router.links:
             if r_router in i.ends and l_router in i.ends:
                 return None
         link = Link(l_router,r_router,link_speed,link_length,capacity)
@@ -193,13 +199,7 @@ class Router:
         return prnt_str
 
     def __eq__(self, other):
-        for i, j in zip(self.links,other.links):
-            if i != j:
-                return False
-        for i, j in zip(self.queue, other.queue):
-            if i != j:
-                return False
-        return True
+        return self.id is other.id
 
 
 class Data:
