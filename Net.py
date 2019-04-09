@@ -23,10 +23,9 @@ class Network:
 
     def tick(self):
         if self.clock is 0:
-            print("Clock was 0, routers populating")
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
-                    d=Data(0, router, router, {id:0}, None)
+                    d=Data(0, router, router, {id:[0,None]}, None)
                     router.receive(d)
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
@@ -104,7 +103,6 @@ class Link:
         # return routers_reached
 
     def send(self, packet):
-        print(packet)
         travel_time = self.length
         if packet.source is self.ends[0]:
             packet.destination = self.ends[1]
@@ -137,18 +135,16 @@ class Router:
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
                          #Queue simulates buildup of data, bottlenecks, etc
-        print(packet)
         link = packet.link
         modified = False
         for key,val in packet.contents.items():
-            print("Key {} and Val {}".format(key, val))
             if key in self.routes:
                 if val + 1 < self.routes[key][0]:
                     self.routes[key][0] = val+1
                     self.routes[key][1] = link
                     modified = True
             else:
-                self.routes[key] =[val + 1, link]
+                self.routes[key] =[val[0] + 1, link]
                 modified = True
         return modified
 
