@@ -121,48 +121,44 @@ def create_network(frontend_routers):
             network.connect(b_router1, b_router2)
 
 
-def draw_tables(root, table_values):
+def draw_tables(root, table_values, routers):
     print("showing tables")
-    #data = [[]]
-    #for i in range(len(routers)):
-    #    data.append([])
 
-    #for j in range(len(routers)):
-        #data[0][0].append(routers[i].name)
-    data = [ ["Dest", "Dist", "Next", "Dest", "Dist", "Next", "Dest", "Dist", "Next"], ]
-
+    data = []
 
     frame = Frame(root, width=800, height=200)
     frame.pack()
 
-    router_headers = ["","Router 0", "","|", "", "Router 1", "","|", "", "Router 2", ""]
+    #headers
+    router_headers = []
     column_headers = []
+    index = 0
+    for router in routers:
+        router_headers.append("")
+        router_headers.append("Router" + str(index))
+        router_headers.append("")
+        router_headers.append("|")
+        column_headers.append("Dest")
+        column_headers.append("Dist")
+        column_headers.append("Next")
+        column_headers.append("|")
+        index +=1
 
-    tree = ttk.Treeview(frame, columns = (1,2,3,4,5,6,7,8,9,10,11,12), height = 5, show = "tree")
-    #tree.grid (row = 0, column = 1, columnspan = 3)
+    columns = []
+    for i in range(1, len(routers)*4 + 1):
+        columns.append(i)
+    print(columns)
+    
+    tree = ttk.Treeview(frame, columns = (columns), height = 5, show = "tree")
 
-    #tree.heading(2, text="Router 0")
-    #tree.heading(5, text="Router 1")
-    #tree.heading(8, text="Router 2")
     tree.insert('', 'end', values = router_headers)
     tree.insert('', 'end', values = column_headers)
 
-    #for col, word in enumerate(c_headers, start=0):
-    #            index = '0,' + str(col)
-    #            tree.set(col, index, word)
-
-    tree.column(1, width = 100)
-    tree.column(2, width = 100)
-    tree.column(3, width = 100)
-    tree.column(4, width = 10)
-    tree.column(5, width = 100)
-    tree.column(6, width = 100)
-    tree.column(7, width = 100)
-    tree.column(8, width = 10)
-    tree.column(9, width = 100)
-    tree.column(10, width = 100)
-    tree.column(11, width = 100)
-
+    for i in columns:
+        if i % 4 != 0:
+            tree.column(i, width = 100)
+        else:
+            tree.column(i, width = 10)
 
     scroll = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
     scroll.pack(side = 'right', fill = 'y')
@@ -171,29 +167,30 @@ def draw_tables(root, table_values):
 
     for i in range(len(data)):
         tree.insert('', 'end', values = (data[i]))
-    # how to change cell color, not working because of iid
-    row_index = 1
-    for child in tree.get_children():
-        col_index = 1
-        for item in (tree.item(child)["values"]):
-            print("x = ", col_index, ", y = ", row_index)
-            iid = tree.identify_element(x = col_index, y = row_index)
-            #iid = tree.identify_row(y = row_index)
-            #iid = tree.identify_column(x = col_index)
-            print("iid = ", iid)
-            if col_index % 6 == 1 or col_index % 6 == 2 or col_index % 6 == 3:
-                #print("odd", item)
-                tree.item(iid, tags = ("oddgroup"))
-            else:
-                #print("even", item)
-                tree.item(iid, tags = ("evengroup"))
-            #print()
-            col_index += 1
-        print(tree.item(child)["values"])
-        row_index +=1
 
-    tree.tag_configure('oddgroup', background='orange')
-    tree.tag_configure('evengroup', background='blue')
+
+    # how to change cell color, not working because of iid
+    # row_index = 1
+    # for child in tree.get_children():
+    #     col_index = 1
+    #     for item in (tree.item(child)["values"]):
+    #         print("x = ", col_index, ", y = ", row_index)
+    #         iid = tree.identify_element(x = col_index, y = row_index)
+    #         #iid = tree.identify_row(y = row_index)
+    #         #iid = tree.identify_column(x = col_index)
+    #         print("iid = ", iid)
+    #         if col_index % 6 == 1 or col_index % 6 == 2 or col_index % 6 == 3:
+    #             #print("odd", item)
+    #             tree.item(iid, tags = ("oddgroup"))
+    #         else:
+    #             #print("even", item)
+    #             tree.item(iid, tags = ("evengroup"))
+    #         #print()
+    #         col_index += 1
+    #     print(tree.item(child)["values"])
+    #     row_index +=1
+    # tree.tag_configure('oddgroup', background='orange')
+    # tree.tag_configure('evengroup', background='blue')
 
     tree.pack(side = 'left')
 
@@ -215,7 +212,7 @@ def draw_canvas(neighbor_array):
     window.grid()
     routers, table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
-    tree = draw_tables(root, table_values)
+    tree = draw_tables(root, table_values, routers)
     create_network(routers)
     #table.insert('', 'end', values = ("a", "b", "c"))
     window.bind("<Left>", leftKey)
