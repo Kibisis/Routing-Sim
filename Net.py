@@ -114,8 +114,8 @@ class Link:
         self.data.append(packet)
 
     def __eq__(self, lhs):
-        return ((lhs.pointA is self.ends[1]) and (lhs.pointB is self.ends[0])) or (
-                    (lhs.pointA is self.ends[0]) and (lhs.pointB is self.ends[1]))
+        return ((lhs.ends[0] is self.ends[1]) and (lhs.ends[1] is self.ends[0])) or (
+                    (lhs.ends[0] is self.ends[0]) and (lhs.ends[1] is self.ends[1]))
 
     def __hash__(self):
         return id(self)
@@ -188,7 +188,6 @@ class Data:
         self.destination = dest
         self.source = source
         self.contents = contents
-        self.size = size
         self.link = link
 
 
