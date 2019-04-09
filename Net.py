@@ -131,15 +131,18 @@ class Router:
         self.routes = {} #dest_id: [distance,link]
         self.queue = [] #Data objects in the order of arrival
 
+    def found_shorter_path(self, cur_dist, new_dist):
+        return new_dist + 1 < cur_dist
+
     def update(self,packet):#packet is a data object
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
                          #Queue simulates buildup of data, bottlenecks, etc
         link = packet.link
         modified = False
-        for router_id, routing_info in packet.contents.items():
+        for router_id, routing_info in packet.contents.items(): #router_id: str, routing_info: [dist, link]
             if router_id in self.routes:
-                if routing_info[0] + 1 < self.routes[router_id][0]:
+                if self.found_shorter_path(self.routes[router_id][0], routing_info[0]):
                     self.routes[router_id][0] = routing_info[0]+1
                     self.routes[router_id][1] = link
                     modified = True
