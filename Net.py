@@ -11,14 +11,16 @@ class Network:
             self.add_router()
 
     def add_router(self):
-        self.router_id+=1
         r = Router(self.router_id)
         self.routers[self.router_id] = r
+        self.router_id+=1
+
 
     def tick(self):
         if self.clock is 0:
             for id,router in self.routers.items(): #add initial positioning to all routers
-                router.update([[self.clock, id, {id:0}], None])
+                if len(router.routes) is 0:
+                    router.update([[self.clock, id, {id:0}], None])
         self.clock+=1
         for id, router in self.routers.items(): #routers process data already present
             router.process()
@@ -57,7 +59,7 @@ class Network:
         yield net.tick()
 
     def __str__(self):
-        str = "Network {self.name}: \n Routers: \t {self.routers}"
+        str = "Network {}: \n Routers: \t {}".format(self.name, self.routers)
         return str
 
 
@@ -103,7 +105,7 @@ class Link:
         return id(self)
 
     def __str__(self):
-        str = "{self.end[0].id} is connected to {self.end[1].id} \nlength: {self.length}\nspeed:{self.speed}\n"
+        str = "{} is connected to {} \nlength: {self.length}\n speed:{}\n".format(self.ends[0].id, self.ends[1].id,self.speed)
         return str
 
 
@@ -148,8 +150,8 @@ class Router:
     def __str__(self):
         connected_routers = []
         for i in self.links:
-            connected_routers.append(i.end[1].id if i.end[2].id is self else i.end[2].id)
-        prnt_str = "Router {self.id} is linked to {connected_routers} \n"
+            connected_routers.append(i.ends[0].id if i.ends[1].id is self.id else i.ends[1].id)
+        prnt_str = "Router {} is linked to {} \n".format(self.id,connected_routers)
         return prnt_str
 
     def __eq__(self, other):
