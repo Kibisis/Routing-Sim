@@ -31,21 +31,21 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
-        print("BEGIN PRINT")
-        for router_id, router in self.routers.items():
-            print("Router ID is: {}".format(router.id))
-            # print("The following ids are in the router: ")
-            # for key, val in router.routes.items():
-            #     print(key)
-            # print("Finished printing ids now.")
-            for link in router.links:
-                print("Router has a Link from {} to {}".format(link.ends[0].id,link.ends[1].id))
-            # for datum in router.queue:
-            #     print(datum.source)
-        # print()
-        # print("-"*30, "\n", self, "\n", "-"*30)
-        # print()
-        print("END PRINT")
+        # print("BEGIN PRINT")
+        # for router_id, router in self.routers.items():
+        #     print("Router ID is: {}".format(router.id))
+        #     # print("The following ids are in the router: ")
+        #     # for key, val in router.routes.items():
+        #     #     print(key)
+        #     # print("Finished printing ids now.")
+        #     for link in router.links:
+        #         print("Router has a Link from {} to {}".format(link.ends[0].id,link.ends[1].id))
+        #     # for datum in router.queue:
+        #     #     print(datum.source)
+        # # print()
+        # # print("-"*30, "\n", self, "\n", "-"*30)
+        # # print()
+        # print("END PRINT")
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -111,13 +111,17 @@ class Link:
 
     def tick(self, clock):  # pump data forward
         i = 0
-        data = self.data
         # routers_reached = set()
-        while i < len(data):
-            if data[i].time >= clock:  # data has arrived at it's destination
+        while i < len(self.data):
+            # print("LINK TICK")
+            if self.data[i].time <= clock:  # data has arrived at it's destination
+                # print("LINK REMOVE?!")
                 # routers_reached.add(data[i][2])
-                data[i].destination.queue.append(data[i])
-                data.pop(i)
+
+                self.data[i].destination.queue.append(self.data[i])
+                # print("LENGTH AFTER {}".format(len(self.data)))
+                self.data.pop(i)
+                # print("LENGTH AFTER: {}".format(len(self.data)))
                 continue #keeps index the same so nothing is skipped
             i += 1
         # return routers_reached
@@ -169,6 +173,9 @@ class Router:
                          #assume data in format of (arrival time, source router, table)
                          #assume the table is a router ID => [Distance, Link]
                          #Queue simulates buildup of data, bottlenecks, etc
+        print("Router {} is processing a packet".format(self.id))
+        print("Starting table is {}".format(self.routes))
+        print("The packet has : {}".format(packet.contents))
         link = packet.link
         modified = False
         for router_id, routing_info in packet.contents.items(): #router_id: str, routing_info: [dist, link]
@@ -179,17 +186,22 @@ class Router:
             else:
                 self.add_new_router(router_id, routing_info[Router.DISTANCE] + 1, link)
                 modified = True
+        # print("The route was modified? {}".format(modified))
+        # if modified:
+            # print("The new routes table is {}".format(self.routes))
         return modified
 
     def process(self): #check the next batch of routes in the queue
         if len(self.queue) > 0:
             modified = self.update(self.queue.pop(0))
             if modified:
+                # print("Time to broadcast!")
                 self.broadcast()
 
     def broadcast(self): #send <dest, distance> out along all links
         #print("broadcasting, length of links:", len(self.links))
         for link in self.links:
+            # print("Broadcasting on link from {} to {}".format(link.ends[0].id,link.ends[1].id))
             pack = Data(Network.clock, self, None, copy.copy(self.routes), link)
             link.send(pack)
             #print("broadcasting from:", self, link)
@@ -218,7 +230,7 @@ class Data:
         self.link = link
 
     def __str__(self):
-        return ("Type: {} Time: {} From {} To {} Containing:{}".format(self.type, self.time, self.source, self.destination,self.contents))
+        return ("Type: {} Time: {} From {} To {} Containing:{}".format(self.type, self.time, self.source.id, self.destination.id ,self.contents))
 
 def build_from_file(fname):
     with open(fname,'r') as f:

@@ -40,37 +40,119 @@ class NetTests(unittest.TestCase):
 
     def test_step_by_step(self):
         print("Step by Step")
-        n=Net.Network("Step Checks", 2)
+        n=Net.Network("Step Checks", 3)
         A_router=n.routers[0]
         B_router=n.routers[1]
-        link = n.connect(A_router,B_router)
+        C_router=n.routers[2]
+        ab_link = n.connect(A_router,B_router)
+        bc_link = n.connect(B_router,C_router)
         #First Tick:
         n.tick()
         #Tables initially populated?
         a_table = {}
         b_table = {}
+        c_table = {}
+
         a_table[A_router.id] = [0, None]
         b_table[B_router.id] = [0, None]
+        c_table[C_router.id] = [0, None]
         self.assertEqual(a_table, A_router.routes)
         self.assertEqual(b_table, B_router.routes)
         #The initial data sent from the first table entry
         self.assertTrue(len(A_router.queue) is 1)
-        self.assertTrue(len(B_router.queue) is 1)
+        self.assertTrue(len(B_router.queue) is 2)
+
         #Second Tick
         n.tick()
-        a_table[B_router.id] = [1, link]
-        b_table[A_router.id] = [1, link]
+        print("First tick states: ")
+        print("Router A has: {}".format(A_router.routes))
+        print("Router B has: {}".format(B_router.routes))
+        print("Router C has: {}".format(C_router.routes))
+        print("End First tick states ")
+        a_table[B_router.id] = [1, ab_link]
+        b_table[A_router.id] = [1, ab_link]
+        b_table[C_router.id] = [1, bc_link]
+        c_table[B_router.id] = [1, bc_link]
+        print("Second tick states: ")
+        print("Router A has: {}".format(A_router.routes))
+        print("Router B has: {}".format(B_router.routes))
+        print("Router C has: {}".format(C_router.routes))
+        print("End Second tick states ")
+
+
+        print("Second State Links: ")
+        for i in ab_link.data:
+            print(i)
+        for i in bc_link.data:
+            print(i)
+        print("End Second State links")
+
+
         #the data table should have updated with the neighbor routers
-        self.assertEqual(a_table, A_router.routes)
-        self.assertEqual(b_table, B_router.routes)
-        #the modified tables should be on the links and not yet reached routers
-        self.assertTrue(len(A_router.queue) is 0)
-        self.assertTrue(len(B_router.queue) is 0)
+        # self.assertEqual(a_table, A_router.routes)
+        # self.assertEqual(b_table, B_router.routes)
+        # self.assertEqual(c_table, C_router.routes)
+        #
+        # #the modified tables should be on the links and not yet reached routers
+        # self.assertTrue(len(A_router.queue) is 0)
+        # self.assertTrue(len(B_router.queue) is 1)
+        # self.assertTrue(len(C_router.queue) is 0)
+
         #Third Tick
         n.tick()
-        #The routes should have remained the same
-        self.assertEqual(a_table, A_router.routes)
-        self.assertEqual(b_table, B_router.routes)
+        print("Third tick states: ")
+        print("Router A has: {}".format(A_router.routes))
+        print("Router B has: {}".format(B_router.routes))
+        print("Router C has: {}".format(C_router.routes))
+        print("End third tick states ")
 
+        print("Third State Links: ")
+        for i in ab_link.data:
+            print(i)
+        for i in bc_link.data:
+            print(i)
+        print("End Third State links")
+
+        n.tick()
+        print("Fourth tick states: ")
+        print("Router A has: {}".format(A_router.routes))
+        print("Router B has: {}".format(B_router.routes))
+        print("Router C has: {}".format(C_router.routes))
+        print("End fourth tick states ")
+
+        print("Fourth State Links: ")
+        for i in ab_link.data:
+            print(i)
+        for i in bc_link.data:
+            print(i)
+        print("End Fourth State links")
+
+
+        n.tick()
+        print("Fifth tick states: ")
+        print("Router A has: {}".format(A_router.routes))
+        print("Router B has: {}".format(B_router.routes))
+        print("Router C has: {}".format(C_router.routes))
+        print("End Fifth tick states ")
+
+        print("Fifth State Links: ")
+        for i in ab_link.data:
+            print(i)
+        for i in bc_link.data:
+            print(i)
+        print("End Fifth State links")
+        
+        for i in range(5):
+            print(n.clock)
+            print("TICK")
+            n.tick()
+            for i in ab_link.data:
+                print(i)
+            for i in bc_link.data:
+                print(i)
+
+        #The routes should have remained the same
+        # self.assertEqual(a_table, A_router.routes)
+        # self.assertEqual(b_table, B_router.routes)
 if __name__ == '__main__':
     unittest.main()
