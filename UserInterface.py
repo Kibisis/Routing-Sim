@@ -98,6 +98,7 @@ def draw_tables(table_values):
     root = Tk()
     window = Canvas(root, width = 400, height = 100)
     table = TableCanvas(window, data=table_values, cellwidth=15)
+    table.createTableFrame()
     table.show()
     window.pack()
     root.mainloop()
