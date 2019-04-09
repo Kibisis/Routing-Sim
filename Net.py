@@ -105,6 +105,7 @@ class Link:
         # return routers_reached
 
     def send(self, packet):
+        print(packet)
         travel_time = self.length
         if packet.source is self.ends[0]:
             packet.destination = self.ends[1]

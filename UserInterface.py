@@ -62,7 +62,8 @@ def draw_routers(window, neighbor_array):
 
     # create table values
 
-    table_values = {'r1':{'Destination_r1':'r1','Distance_r1':0,' Next_r1':0,'Destination_r2':'r2','Distance_r2':0,'Next_r2':0}}
+    table_values = {'row0':{'r0_':'Dest','r0__':'Dist',' r0___':'Next','r1_':'Dest','r1__':'Dist',' r1___':'Next'}}
+                    #'row1':{}}
     return (routers, table_values)
 
 
@@ -96,7 +97,8 @@ def draw_tables(table_values):
     print("showing tables")
     root = Tk()
     window = Canvas(root, width = 400, height = 100)
-    table = TableCanvas(window, data=table_values)
+    table = TableCanvas(window, data=table_values, cellwidth=15)
+    table.createTableFrame()
     table.show()
     window.pack()
     root.mainloop()
@@ -119,6 +121,11 @@ def draw_canvas(neighbor_array):
     window.pack()
     root.mainloop()
     return Net.Network("canvas",settings.router)
+
+## handling moving shapes
+def handle_press():
+    None
+
 
 def main():
     # Parse arguments
