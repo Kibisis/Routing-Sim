@@ -12,7 +12,7 @@ from itertools import combinations
 network = Net.Network(name="Simulator", router_count=5)
 
 class Router():
-    def __init__(self, x1, y1, size, name, neighbors=[]):
+    def __init__(self, x1, y1, size, name, rno, neighbors=[]):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x1 + size
@@ -22,6 +22,7 @@ class Router():
         self.name = name
         self.neighbors = []
         self.neighbors_found = []
+        self.rno = rno
 
     def add_neighbors(self, routers):
         for r in routers:
@@ -45,11 +46,11 @@ class Router():
 #create routers
 def draw_routers(window, neighbor_array):
     size = 100
-    r0 = Router(150, 150, size, "r0")
-    r1 = Router(50, 300, size, "r1")
-    r2 = Router(150, 450, size, "r2")
-    r3 = Router(450, 225, size, "r3")
-    r4 = Router(450, 375, size, "r4")
+    r0 = Router(150, 150, size, "r0", 0)
+    r1 = Router(50, 300, size, "r1", 1)
+    r2 = Router(150, 450, size, "r2", 2)
+    r3 = Router(450, 225, size, "r3", 3)
+    r4 = Router(450, 375, size, "r4", 4)
     routers = [r0, r1, r2, r3, r4]
 
     for i in range(len(routers)):
@@ -105,6 +106,18 @@ def create_links(routers, links):
     #for array in neighbor_array:
         #print(array)
     #print(indexes)
+
+def create_network(frontend_routers):
+    print("creating_network")
+    global network
+    backend_routers = network.routers
+    for f_router in frontend_routers:
+        for f_neighbor in f_router.neighbors:
+            idx1 = f_router.rno
+            idx2 = f_neighbor.rno
+            b_router1 = backend_routers[idx1]
+            b_router2 = backend_routers[idx2]
+            network.connect(b_router1, b_router2)
 
 
 def draw_tables(root, table_values):
@@ -162,16 +175,17 @@ def draw_canvas(neighbor_array):
     root = Tk()
     window = Canvas(root, width = 800, height = 800)
     window.grid()
-    routers,table_values = draw_routers(window, neighbor_array)
+    routers, table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
     table = draw_tables(root, table_values)
+    create_network(routers)
     #table.insert('', 'end', values = ("a", "b", "c"))
     window.bind("<Left>", leftKey)
     window.bind("<Right>", rightKey)
     window.focus_set()
     window.pack()
     root.mainloop()
-    return Net.Network("canvas",settings.router)
+    return routers
 
 ## handling ticks
 def handle_press(event):
@@ -184,7 +198,9 @@ def rightKey(event):
     print("Right key pressed")
     global network
     new_state = network.tick()
-    print(new_state.routers)
+    for idd,router in new_state.routers.items():
+        #print(idd, router.routes)
+        blah = 0
 
 
 
@@ -195,11 +211,11 @@ def main():
             default=5,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
-            default=8,
+            default=5,
             help='Number of links')
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
-    draw_canvas(neighbor_array)
+    routers = draw_canvas(neighbor_array)
 
     # while True:
     #     handle_press()

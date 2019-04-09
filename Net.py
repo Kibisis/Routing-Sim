@@ -168,10 +168,11 @@ class Router:
                 self.broadcast()
 
     def broadcast(self): #send <dest, distance> out along all links
+        #print("broadcasting, length of links:", len(self.links))
         for link in self.links:
-
             pack = Data(Network.clock, self, None, self.routes, link)
             link.send(pack)
+            #print("boradcasting from:", self, link)
 
     def receive(self, packet):
         self.queue.append(packet)
