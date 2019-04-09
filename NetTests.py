@@ -22,8 +22,6 @@ class NetTests(unittest.TestCase):
         self.assertEqual(A.links,B.links, "Router A and B should contain the same link")
 
     def test_initial_tick(self):
-        pass
-        import Net
         n = Net.Network("Test3", 5)
         A_router = n.routers[0]
         B_router = n.routers[1]
@@ -38,7 +36,41 @@ class NetTests(unittest.TestCase):
 
         for i in range(100):
             n.tick()
-        print(n)
+        # print(n)
+
+    def test_step_by_step(self):
+        print("Step by Step")
+        n=Net.Network("Step Checks", 2)
+        A_router=n.routers[0]
+        B_router=n.routers[1]
+        link = n.connect(A_router,B_router)
+        #First Tick:
+        n.tick()
+        #Tables initially populated?
+        a_table = {}
+        b_table = {}
+        a_table[A_router.id] = [0, None]
+        b_table[B_router.id] = [0, None]
+        self.assertEqual(a_table, A_router.routes)
+        self.assertEqual(b_table, B_router.routes)
+        #The initial data sent from the first table entry
+        self.assertTrue(len(A_router.queue) is 1)
+        self.assertTrue(len(B_router.queue) is 1)
+        #Second Tick
+        n.tick()
+        a_table[B_router.id] = [1, link]
+        b_table[A_router.id] = [1, link]
+        #the data table should have updated with the neighbor routers
+        self.assertEqual(a_table, A_router.routes)
+        self.assertEqual(b_table, B_router.routes)
+        #the modified tables should be on the links and not yet reached routers
+        self.assertTrue(len(A_router.queue) is 0)
+        self.assertTrue(len(B_router.queue) is 0)
+        #Third Tick
+        n.tick()
+        #The routes should have remained the same
+        self.assertEqual(a_table, A_router.routes)
+        self.assertEqual(b_table, B_router.routes)
 
 if __name__ == '__main__':
     unittest.main()
