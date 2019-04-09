@@ -3,8 +3,11 @@
 import copy
 import Queue
 
+past_networks = {}
+
 class Network:
     clock = 0
+
     def __init__(self, name="Network", router_count=0):
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
@@ -60,6 +63,7 @@ class Network:
 
     @staticmethod
     def run(net):
+        past_networks[Network.clock] = copy.deepcopy(net)
         yield net.tick()
 
     def __str__(self):
@@ -155,7 +159,7 @@ class Router:
     def broadcast(self): #send <dest, distance> out along all links
         for link in self.links:
             pack = Data(clock, self, None, link, self.routes)
-            link.send(self.routes.deepcopy(), self) #TODO may need to change this to a Data object
+            link.send(copy.deepcopy(self.routes), self) #TODO may need to change this to a Data object
 
     def receive(self, packet):
         self.queue.append(packet)
