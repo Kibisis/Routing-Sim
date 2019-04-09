@@ -31,15 +31,21 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
-        # for router_id, router in self.routers.items():
-        #     print(router)
-        #     for link in router.links:
-        #         print(link)
-        #     for datum in router.queue:
-        #         print(datum.source)
-        print()
-        print("-"*30, "\n", self, "\n", "-"*30)
-        print()
+        print("BEGIN PRINT")
+        for router_id, router in self.routers.items():
+            print("Router ID is: {}".format(router.id))
+            # print("The following ids are in the router: ")
+            # for key, val in router.routes.items():
+            #     print(key)
+            # print("Finished printing ids now.")
+            for link in router.links:
+                print("Router has a Link from {} to {}".format(link.ends[0].id,link.ends[1].id))
+            # for datum in router.queue:
+            #     print(datum.source)
+        # print()
+        # print("-"*30, "\n", self, "\n", "-"*30)
+        # print()
+        print("END PRINT")
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -157,7 +163,7 @@ class Router:
         self.routes[router_id][Router.LINK] = link
 
     def add_new_router(self, router_id, distance, link):
-        self.routes[router_id] =[distance, link]
+        self.routes[router_id] = [distance, link]
 
     def update(self,packet):#packet is a data object
                          #assume data in format of (arrival time, source router, table)
@@ -184,9 +190,9 @@ class Router:
     def broadcast(self): #send <dest, distance> out along all links
         #print("broadcasting, length of links:", len(self.links))
         for link in self.links:
-            pack = Data(Network.clock, self, None, self.routes, link)
+            pack = Data(Network.clock, self, None, copy.copy(self.routes), link)
             link.send(pack)
-            #print("boradcasting from:", self, link)
+            #print("broadcasting from:", self, link)
 
     def receive(self, packet):
         self.queue.append(packet)
@@ -210,6 +216,7 @@ class Data:
         self.source = source
         self.contents = contents
         self.link = link
+
     def __str__(self):
         return ("Type: {} Time: {} From {} To {} Containing:{}".format(self.type, self.time, self.source, self.destination,self.contents))
 
