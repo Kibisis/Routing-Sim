@@ -115,28 +115,39 @@ def draw_tables(root, table_values):
 
     #for j in range(len(routers)):
         #data[0][0].append(routers[i].name)
-    data = [ ["val1", "val2", "val3", "val4", "val5", "val6", "val7", "val8", "val9"], ]
+    data = [ ["val1", "val2", "val3","|", "val4", "val5", "val6", "|", "val7", "val8", "val9"], ]
 
 
     frame = Frame(root, width=800, height=200)
     frame.pack()
 
-    tree = ttk.Treeview(frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 5, show = "headings")
-    tree.grid (row = 0, column = 1, columnspan = 3)
+    router_headers = ["","Router 0", "","|", "", "Router 1", "","|", "", "Router 2", ""]
+    column_headers = []
 
-    tree.heading(2, text="Router 0")
-    tree.heading(5, text="Router 1")
-    tree.heading(8, text="Router 2")
+    tree = ttk.Treeview(frame, columns = (1,2,3,4,5,6,7,8,9,10,11,12), height = 5, show = "tree")
+    #tree.grid (row = 0, column = 1, columnspan = 3)
+
+    #tree.heading(2, text="Router 0")
+    #tree.heading(5, text="Router 1")
+    #tree.heading(8, text="Router 2")
+    tree.insert('', 'end', values = router_headers)
+    tree.insert('', 'end', values = column_headers)
+
+    #for col, word in enumerate(c_headers, start=0):
+    #            index = '0,' + str(col)
+    #            tree.set(col, index, word)
 
     tree.column(1, width = 100)
     tree.column(2, width = 100)
     tree.column(3, width = 100)
-    tree.column(4, width = 100)
+    tree.column(4, width = 10)
     tree.column(5, width = 100)
     tree.column(6, width = 100)
     tree.column(7, width = 100)
-    tree.column(8, width = 100)
+    tree.column(8, width = 10)
     tree.column(9, width = 100)
+    tree.column(10, width = 100)
+    tree.column(11, width = 100)
 
 
     scroll = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
@@ -144,10 +155,35 @@ def draw_tables(root, table_values):
 
     tree.configure(yscrollcommand=scroll.set)
 
-    for val in data:
-        #for input in val:
-        tree.insert('', 'end', values = (val) )
+    for i in range(len(data)):
+        tree.insert('', 'end', values = (data[i]))
+    # how to change cell color, not working because of iid
+    row_index = 1
+    for child in tree.get_children():
+        col_index = 1
+        for item in (tree.item(child)["values"]):
+            print("x = ", col_index, ", y = ", row_index)
+            iid = tree.identify_element(x = col_index, y = row_index)
+            #iid = tree.identify_row(y = row_index)
+            #iid = tree.identify_column(x = col_index)
+            print("iid = ", iid)
+            if col_index % 6 == 1 or col_index % 6 == 2 or col_index % 6 == 3:
+                #print("odd", item)
+                tree.item(iid, tags = ("oddgroup"))
+            else:
+                #print("even", item)
+                tree.item(iid, tags = ("evengroup"))
+            #print()
+            col_index += 1
+        print(tree.item(child)["values"])
+        row_index +=1
+
+    tree.tag_configure('oddgroup', background='orange')
+    tree.tag_configure('evengroup', background='blue')
+
     tree.pack(side = 'left')
+
+
 
     return tree
 
@@ -187,7 +223,6 @@ def rightKey(event):
     print(new_state.routers)
 
 
-
 def main():
     # Parse arguments
     arg_parser = ArgumentParser(description='DV simualtor')
@@ -195,7 +230,7 @@ def main():
             default=5,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
-            default=8,
+            default=5,
             help='Number of links')
     settings = arg_parser.parse_args()
     neighbor_array = create_links(settings.router, settings.link)
