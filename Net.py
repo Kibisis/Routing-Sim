@@ -31,12 +31,12 @@ class Network:
             router.process()
         for link in self.links: #pumps data forward
             link.tick(self.clock)
-        # print("BEGIN PRINT")
-        # for router_id, router in self.routers.items():
-        #     print("Router ID is: {}".format(router.id))
+        print("BEGIN PRINT")
+        for router_id, router in self.routers.items():
+            print("Router ID is: {}".format(router.id))
         #     # print("The following ids are in the router: ")
-        #     # for key, val in router.routes.items():
-        #     #     print(key)
+            for key, val in router.routes.items():
+                print(key)
         #     # print("Finished printing ids now.")
         #     for link in router.links:
         #         print("Router has a Link from {} to {}".format(link.ends[0].id,link.ends[1].id))
@@ -45,7 +45,7 @@ class Network:
         # # print()
         # # print("-"*30, "\n", self, "\n", "-"*30)
         # # print()
-        # print("END PRINT")
+        print("END PRINT")
         return self
 
     def batch_connect(self,source_list, dest_list, link_speeds, link_lengths):
@@ -136,6 +136,8 @@ class Link:
         self.data.append(packet)
 
     def __eq__(self, lhs):
+        if self is None or lhs is None:
+            return self is lhs
         return ((lhs.ends[0] is self.ends[1]) and (lhs.ends[1] is self.ends[0])) or (
                     (lhs.ends[0] is self.ends[0]) and (lhs.ends[1] is self.ends[1]))
 
@@ -217,6 +219,8 @@ class Router:
         return prnt_str
 
     def __eq__(self, other):
+        if self is None or other is None:
+            return self is other
         return self.id is other.id
 
 
