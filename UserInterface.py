@@ -148,7 +148,7 @@ def draw_tables(root, table_values, routers):
     for i in range(1, len(routers)*4 + 1):
         columns.append(i)
     print(columns)
-    
+
     tree = ttk.Treeview(frame, columns = (columns), height = 5, show = "tree")
 
     tree.insert('', 'end', values = router_headers)
@@ -250,7 +250,8 @@ def update_table(new_state):
                     row.extend([dest, dist, link])
                 else:
                     #print(dest, dist, link.pointB.id)
-                    row.extend([dest, dist, link.pointB.id])
+                    idx_b = 1
+                    row.extend([dest, dist, link.ends[idx_b]])
                 found_data = True
             else:
                 row.extend(['', '', ''])
