@@ -226,12 +226,12 @@ def update_table(new_state):
     global global_tree
     index = 0
     found_data = True
-
-    # for i in global_tree.get_children():
+    count = 1
+    for i in global_tree.get_children():
     #     print(i)
-    #     if int(i[-1]) > 1:
-    #         print("deleting")
-    #         global_tree.delete(i)
+        if int(i[-1]) > 2:
+            print("deleting")
+            global_tree.delete(i)
 
     while found_data:
         found_data = False
@@ -247,14 +247,14 @@ def update_table(new_state):
                 link = routes[index][1]
                 if link == None:
                     #print(dest, dist, link)
-                    row.extend([dest, dist, link])
+                    row.extend([dest, dist, link, '|'])
                 else:
                     #print(dest, dist, link.pointB.id)
                     idx_b = 1
-                    row.extend([dest, dist, link.ends[idx_b]])
+                    row.extend([dest, dist, link.ends[idx_b], '|'])
                 found_data = True
             else:
-                row.extend(['', '', ''])
+                row.extend(['', '', '', ''])
         print(row)
         global_tree.insert('', 'end', values=row)
         index += 1
