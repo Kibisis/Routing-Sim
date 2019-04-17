@@ -126,7 +126,7 @@ def draw_tables(root, table_values, routers):
 
     data = []
 
-    frame = Frame(root, width=800, height=200)
+    frame = Frame(root, width=800, height=300)
     frame.pack()
 
     #headers
@@ -228,10 +228,10 @@ def update_table(new_state):
     found_data = True
     count = 1
     for i in global_tree.get_children():
-    #     print(i)
-        if int(i[-1]) > 2:
-            print("deleting")
+        if count > 2:
+            #print("deleting")
             global_tree.delete(i)
+        count += 1
 
     while found_data:
         found_data = False
@@ -250,8 +250,10 @@ def update_table(new_state):
                     row.extend([dest, dist, link, '|'])
                 else:
                     #print(dest, dist, link.pointB.id)
-                    idx_b = 1
-                    row.extend([dest, dist, link.ends[idx_b], '|'])
+                    link_show = link.ends[1] # choose link thats not itself 
+                    if link_show is router:
+                        link_show = link.ends[0]
+                    row.extend([dest, dist, link_show, '|'])
                 found_data = True
             else:
                 row.extend(['', '', '', ''])
