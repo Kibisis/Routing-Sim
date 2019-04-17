@@ -108,7 +108,7 @@ class Network:
 
 
 class Link:
-    def __init__(self, pointA, pointB, speed=1, length=1,
+    def __init__(self, pointA, pointB, length=1, speed=1,
                  capacity=None):  # point A and B are Router or Network objects
         self.speed = speed  # allows for duplicate links higher throughput
         self.length = length
