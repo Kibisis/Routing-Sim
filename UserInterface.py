@@ -49,13 +49,32 @@ def draw_routers(window, neighbor_array):
     #draw_routers(window, neighbor_array)
     # 800 x 8000
     size = 50
-
-    r0 = Router(150, 150, size, "r0", 0)
-    r1 = Router(50, 300, size, "r1", 1)
-    r2 = Router(150, 450, size, "r2", 2)
-    r3 = Router(450, 225, size, "r3", 3)
-    r4 = Router(450, 375, size, "r4", 4)
-    routers = [r0, r1, r2, r3, r4]
+    number_routers = len(neighbor_array)
+    routers = []
+    alpha = math.pi/number_routers
+    center = (400,400)
+    radius = 400 - size*2
+    #def _draw_regular_polygon(self, center, radius, n, angle, **kwargs):
+    #    angle -= (math.pi/n)
+    #    coord_list = [[center[0] + radius * math.sin((2*math.pi/n) * i - angle),
+    #        center[1] + radius * math.cos((2*math.pi/n) * i - angle)] for i in range(n)]
+    #    return self.create_polygon(coord_list, **kwargs)
+    i = 0
+    for neighbors in neighbor_array:
+        #alpha -= (math.pi/n)
+        #coord_list = [[center[0] + radius * math.sin((2*math.pi/n) * i - angle),
+        #    center[1] + radius * math.cos((2*math.pi/n) * i - angle)] ]
+        mid_x = center[0] + radius*math.sin((2*math.pi/number_routers)*i - alpha)
+        mid_y = center[1] + radius*math.cos((2*math.pi/number_routers)*i - alpha)
+        router = "r" + str(i)
+        routers.append(Router(mid_x - size/2, mid_y - size/2, size, router, i))
+        i = i + 1
+    #r0 = Router(150, 150, size, "r0", 0)
+    #r1 = Router(50, 300, size, "r1", 1)
+    #r2 = Router(150, 450, size, "r2", 2)
+    #r3 = Router(450, 225, size, "r3", 3)
+    #r4 = Router(450, 375, size, "r4", 4)
+    #routers = [r0, r1, r2, r3, r4]
 
     for i in range(len(routers)):
         for j in range(len(neighbor_array[i])):
@@ -106,7 +125,7 @@ def create_links(routers, links):
             neighbor_array[pair[0]].append(pair[1])
             neighbor_array[pair[1]].append(pair[0])
         index_counter += 1
-    print(neighbor_array)
+    print("neighbors", neighbor_array)
     return neighbor_array
     #for array in neighbor_array:
         #print(array)
@@ -285,7 +304,7 @@ def main():
     # Parse arguments
     arg_parser = ArgumentParser(description='DV simualtor')
     arg_parser.add_argument('-r', '--router', dest='router', action='store',
-            default=5,
+            default=6,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
             default=5,
