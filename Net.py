@@ -3,15 +3,15 @@
 import copy
 import queue
 
-past_networks = {}
-
 class Network:
     clock = 0
+
     def __init__(self, name="Network", router_count=0):
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
         self.links=set()
         self.router_id = 0
+        self.past_networks = {}
         for i in range(router_count):
             self.add_router()
 
@@ -26,7 +26,13 @@ class Network:
                 if len(router.routes) is 0:
                     d=Data(0, router, router, {id:[-1,None]}, None)
                     router.receive(d)
+
         self.clock+=1
+        if self.clock in self.past_networks:
+          return self.past_networks[self.clock]  
+        else:    
+            self.past_networks[self.clock] = copy.deepcopy(self)
+
         for id, router in self.routers.items(): #routers process data already present
             router.process()
         for link in self.links: #pumps data forward
@@ -80,17 +86,19 @@ class Network:
         r_router.links.add(link)
         return link
 
-    def run(self):
-        if self.clock in past_networks:
-            yield past_networks[self.clock]
-            self.clock += 1
-        else:
-            past_networks[Network.clock] = copy.deepcopy(net)
-            yield net.tick()
+    # def run(self):
+    #     if self.clock in past_networks:
+    #         yield past_networks[self.clock]
+    #         self.clock += 1
+    #     else:
+    #         past_networks[self.clock] = copy.deepcopy(net)
+    #         print(past_networks, "in run")
+    #         yield net.tick()
 
     def back(self):
         self.clock -= 1
-        yield self.past_networks[self.clock]
+        print(self.clock, self.past_networks)
+        return self.past_networks[self.clock]
 
 
 

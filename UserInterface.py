@@ -153,16 +153,16 @@ def draw_tables(root, table_values, routers):
         columns.append(i)
     print(columns)
 
-    tree = ttk.Treeview(frame, columns = (columns), height = 5, show = "tree")
+    tree = ttk.Treeview(frame, columns=(columns), height=len(routers)+2, show="tree")
 
-    tree.insert('', 'end', values = router_headers)
-    tree.insert('', 'end', values = column_headers)
+    tree.insert('', 'end', values=router_headers)
+    tree.insert('', 'end', values=column_headers)
 
     for i in columns:
         if i % 4 != 0:
-            tree.column(i, width = 100)
+            tree.column(i, width=100)
         else:
-            tree.column(i, width = 10)
+            tree.column(i, width=10)
 
     scroll = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
     scroll.pack(side = 'right', fill = 'y')
@@ -254,15 +254,17 @@ def update_table(new_state):
                     row.extend([dest, dist, link, '|'])
                 else:
                     #print(dest, dist, link.pointB.id)
-                    link_show = link.ends[1] # choose link thats not itself 
+                    link_show = link.ends[1] # choose link thats not itself
                     if link_show is router:
                         link_show = link.ends[0]
-                    row.extend([dest, dist, link_show, '|'])
+                    row.extend([dest, dist, link_show.id, '|'])
                 found_data = True
             else:
                 row.extend(['', '', '', ''])
-        print(row)
-        global_tree.insert('', 'end', values=row)
+        # print(row)
+        # print(row.count(''))
+        if row.count('') != len(new_state.routers)*4:
+            global_tree.insert('', 'end', values=row)
         index += 1
 
 
@@ -272,6 +274,12 @@ def handle_press(event):
 
 def leftKey(event):
     print("Left key pressed")
+    global network
+    new_state = network.back()
+    for idd, router in new_state.routers.items():
+        print(idd, router.routes)
+
+    update_table(new_state)
 
 def rightKey(event):
     print("Right key pressed")
