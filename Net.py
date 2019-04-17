@@ -81,8 +81,20 @@ class Network:
         return link
 
     def run(self):
-        past_networks[Network.clock] = copy.deepcopy(net)
-        yield net.tick()
+        if self.clock in past_networks:
+            yield past_networks[self.clock]
+            self.clock += 1
+        else:
+            past_networks[Network.clock] = copy.deepcopy(net)
+            yield net.tick()
+
+    def back(self):
+        self.clock -= 1
+        if self.clock in self.past_networks:
+            yield self.past_networks[self.clock]
+        else:
+            yield self
+
 
     def __str__(self):
         router_str = ""
