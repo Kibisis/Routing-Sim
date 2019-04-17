@@ -46,7 +46,10 @@ class Router():
 
 #create routers
 def draw_routers(window, neighbor_array):
-    size = 100
+    #draw_routers(window, neighbor_array)
+    # 800 x 8000
+    size = 50
+
     r0 = Router(150, 150, size, "r0", 0)
     r1 = Router(50, 300, size, "r1", 1)
     r2 = Router(150, 450, size, "r2", 2)
@@ -103,6 +106,7 @@ def create_links(routers, links):
             neighbor_array[pair[0]].append(pair[1])
             neighbor_array[pair[1]].append(pair[0])
         index_counter += 1
+    print(neighbor_array)
     return neighbor_array
     #for array in neighbor_array:
         #print(array)
