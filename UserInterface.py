@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 import random
 from itertools import combinations
 
-network = Net.Network(name="Simulator", router_count=5)
+network = None
 global_tree = None
 
 class Router():
@@ -49,13 +49,31 @@ def draw_routers(window, neighbor_array):
     #draw_routers(window, neighbor_array)
     # 800 x 8000
     size = 50
+    number_routers = len(neighbor_array)
+    routers = []
+    alpha = math.pi/number_routers
+    center = (400,400)
+    radius = 400 - size*2
+    table_values = {'row0':{}}
 
-    r0 = Router(150, 150, size, "r0", 0)
-    r1 = Router(50, 300, size, "r1", 1)
-    r2 = Router(150, 450, size, "r2", 2)
-    r3 = Router(450, 225, size, "r3", 3)
-    r4 = Router(450, 375, size, "r4", 4)
-    routers = [r0, r1, r2, r3, r4]
+    i = 0
+    for neighbors in neighbor_array:
+        # create midpoints for each router and creater router object
+        mid_x = center[0] + radius*math.sin((2*math.pi/number_routers)*i - alpha)
+        mid_y = center[1] + radius*math.cos((2*math.pi/number_routers)*i - alpha)
+        router = "r" + str(i)
+        routers.append(Router(mid_x - size/2, mid_y - size/2, size, router, i))
+
+        #create table values
+        table_values['row0'][router] = 'Dest'
+        router = router + " "
+        table_values['row0'][router] = 'Dist'
+        router = router + "  "
+        table_values['row0'][router] = 'Next'
+        i = i + 1
+    print("------------")
+    print(table_values)
+
 
     for i in range(len(routers)):
         for j in range(len(neighbor_array[i])):
@@ -67,21 +85,14 @@ def draw_routers(window, neighbor_array):
         router.print_neighbors()
         print()
 
-    #r1.add_neighbors([r2, r3])
-    #r2.add_neighbors([r1, r3, r4, r5])
-    #r3.add_neighbors([r1, r2])
-    #r4.add_neighbors([r2, r5])
-    #r5.add_neighbors([r2, r4])
-
     for r in routers:
         window.create_oval(r.x1, r.y1, r.x2, r.y2, fill="blue")
         window.create_text(r.x_mid, r.y_mid, fill="white", text=r.name)
 
-    # create table values
 
-    table_values = {'row0':{'r0':'Dest','r0 ':'Dist','r0  ':'Next','r1':'Dest','r1 ':'Dist',' r1  ':'Next',
-                            'r2':'Dest','r2 ':'Dist','r2  ':'Next','r3':'Dest','r3 ':'Dist',' r3  ':'Next',
-                            'r4':'Dest','r4 ':'Dist','r4  ':'Next'}}
+    #table_values = {'row0':{'r0':'Dest','r0 ':'Dist','r0  ':'Next','r1':'Dest','r1 ':'Dist',' r1  ':'Next',
+    #                        'r2':'Dest','r2 ':'Dist','r2  ':'Next','r3':'Dest','r3 ':'Dist',' r3  ':'Next',
+    #                        'r4':'Dest','r4 ':'Dist','r4  ':'Next'}}
                     #'row1':{}}
     return (routers, table_values)
 
@@ -106,7 +117,7 @@ def create_links(routers, links):
             neighbor_array[pair[0]].append(pair[1])
             neighbor_array[pair[1]].append(pair[0])
         index_counter += 1
-    print(neighbor_array)
+    print("neighbors", neighbor_array)
     return neighbor_array
     #for array in neighbor_array:
         #print(array)
@@ -116,10 +127,13 @@ def create_network(frontend_routers):
     print("creating_network")
     global network
     backend_routers = network.routers
+    print(backend_routers)
     for f_router in frontend_routers:
         for f_neighbor in f_router.neighbors:
             idx1 = f_router.rno
             idx2 = f_neighbor.rno
+            print("index 1", idx1)
+            print("index 2", idx2)
             b_router1 = backend_routers[idx1]
             b_router2 = backend_routers[idx2]
             network.connect(b_router1, b_router2)
@@ -295,12 +309,14 @@ def main():
     # Parse arguments
     arg_parser = ArgumentParser(description='DV simualtor')
     arg_parser.add_argument('-r', '--router', dest='router', action='store',
-            default=5,
+            default=6,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
-            default=5,
+            default=8,
             help='Number of links')
     settings = arg_parser.parse_args()
+    global network
+    network = Net.Network(name="Simulator", router_count=settings.router)
     neighbor_array = create_links(settings.router, settings.link)
     tree = draw_canvas(neighbor_array)
 
