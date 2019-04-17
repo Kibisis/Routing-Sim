@@ -90,10 +90,8 @@ class Network:
 
     def back(self):
         self.clock -= 1
-        if self.clock in self.past_networks:
-            yield self.past_networks[self.clock]
-        else:
-            yield self
+        yield self.past_networks[self.clock]
+
 
 
     def __str__(self):
