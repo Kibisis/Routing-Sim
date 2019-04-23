@@ -106,10 +106,10 @@ def draw_link(window, routers):
         for neighbor in router.neighbors:
             window.create_line(router.x_mid, router.y_mid, neighbor.x_mid, neighbor.y_mid)
 
-def create_links(routers, links):
+def create_links(routers, num_links):
     pairs = combinations(range(routers), 2)
     total_pairs = int(math.factorial(routers)/(2*math.factorial(routers - 2)))
-    indexes = random.sample(range(total_pairs), links)
+    indexes = random.sample(range(total_pairs), num_links)
     neighbor_array = []
     for i in range(routers):
         neighbor_array.append([])
