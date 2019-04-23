@@ -309,10 +309,10 @@ def main():
     # Parse arguments
     arg_parser = ArgumentParser(description='DV simualtor')
     arg_parser.add_argument('-r', '--router', dest='router', action='store',
-            default=6,
+            default=10,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
-            default=8,
+            default=20,
             help='Number of links')
     settings = arg_parser.parse_args()
     global network
