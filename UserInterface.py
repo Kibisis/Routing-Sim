@@ -4,6 +4,7 @@ import sys
 import argparse
 from tkinter import *
 from tkinter import ttk
+import tkinter as tk
 import math
 from argparse import ArgumentParser
 import random
@@ -52,7 +53,7 @@ def draw_routers(window, neighbor_array):
     number_routers = len(neighbor_array)
     routers = []
     alpha = math.pi/number_routers
-    center = (400,400)
+    center = (400,350)
     radius = 400 - size*2
     table_values = {'row0':{}}
 
@@ -71,19 +72,20 @@ def draw_routers(window, neighbor_array):
         router = router + "  "
         table_values['row0'][router] = 'Next'
         i = i + 1
-    print("------------")
-    print(table_values)
+    #print("------------")
+    #print(table_values)
 
-
+    # update each router neighbor list
     for i in range(len(routers)):
         for j in range(len(neighbor_array[i])):
             neighbor_array[i][j] = routers[neighbor_array[i][j]]
         routers[i].add_neighbors(neighbor_array[i])
 
     # test to see if routers have neighbors
-    for router in routers:
-        router.print_neighbors()
-        print()
+    #for router in routers:
+        #router.print_neighbors()
+        #print()
+
 
     for r in routers:
         window.create_oval(r.x1, r.y1, r.x2, r.y2, fill="blue")
@@ -94,6 +96,7 @@ def draw_routers(window, neighbor_array):
     #                        'r2':'Dest','r2 ':'Dist','r2  ':'Next','r3':'Dest','r3 ':'Dist',' r3  ':'Next',
     #                        'r4':'Dest','r4 ':'Dist','r4  ':'Next'}}
                     #'row1':{}}
+
     return (routers, table_values)
 
 
@@ -113,11 +116,11 @@ def create_links(routers, links):
     index_counter = 0
     for pair in pairs:
         if index_counter in indexes:
-            print(pair)
+            #print(pair)
             neighbor_array[pair[0]].append(pair[1])
             neighbor_array[pair[1]].append(pair[0])
         index_counter += 1
-    print("neighbors", neighbor_array)
+    #print("neighbors", neighbor_array)
     return neighbor_array
     #for array in neighbor_array:
         #print(array)
@@ -127,13 +130,13 @@ def create_network(frontend_routers):
     print("creating_network")
     global network
     backend_routers = network.routers
-    print(backend_routers)
+    #print(backend_routers)
     for f_router in frontend_routers:
         for f_neighbor in f_router.neighbors:
             idx1 = f_router.rno
             idx2 = f_neighbor.rno
-            print("index 1", idx1)
-            print("index 2", idx2)
+            #print("index 1", idx1)
+            #print("index 2", idx2)
             b_router1 = backend_routers[idx1]
             b_router2 = backend_routers[idx2]
             network.connect(b_router1, b_router2)
@@ -165,9 +168,9 @@ def draw_tables(root, table_values, routers):
     columns = []
     for i in range(1, len(routers)*4 + 1):
         columns.append(i)
-    print(columns)
-
-    tree = ttk.Treeview(frame, columns=(columns), height=len(routers)+2, show="tree")
+    #print(columns)
+    height = len(routers)+2
+    tree = ttk.Treeview(frame, columns=(columns), height=5, show="tree")#, anchor = 's')
 
     tree.insert('', 'end', values=router_headers)
     tree.insert('', 'end', values=column_headers)
@@ -178,10 +181,14 @@ def draw_tables(root, table_values, routers):
         else:
             tree.column(i, width=10)
 
-    scroll = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
-    scroll.pack(side = 'right', fill = 'y')
+    scrolly = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    scrolly.pack(fill = 'y', side = 'right')
 
-    tree.configure(yscrollcommand=scroll.set)
+    scrollx = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    scrollx.pack(fill = 'x', side  = 'bottom')
+
+
+    tree.configure(yscrollcommand=scrolly.set, xscrollcommand = scrollx.set)
 
     for i in range(len(data)):
         tree.insert('', 'end', values = (data[i]))
@@ -210,7 +217,7 @@ def draw_tables(root, table_values, routers):
     # tree.tag_configure('oddgroup', background='orange')
     # tree.tag_configure('evengroup', background='blue')
 
-    tree.pack(side = 'left')
+    tree.pack(side = 'left', anchor = 'nw')
 
     global global_tree
     global_tree = tree
@@ -226,8 +233,29 @@ def stop_communication(source, dest):
 #background
 def draw_canvas(neighbor_array):
     root = Tk()
+
+    #frame=Frame(root,width=800,height=800)
+    #frame.pack(fill=BOTH, expand=True)
+    #frame.grid(row=0,column=0)
+    #window=Canvas(frame,width=800,height=400)#, anchor = 'n')
+    #window.grid()
+
+    #scroll = ttk.Scrollbar(frame, orient="vertical", command=window.xview)
+    #scroll.pack(side = 'bottom', fill = 'x')
+
+    #window.configure(xscrollcommand=scroll.set)
+
+    #vbar=Scrollbar(frame,orient=VERTICAL)
+    #vbar.pack(side=RIGHT,fill=Y)
+    #vbar.config(command=window.yview)
+
+    #window.config(width=800,height=800)
+    #window.config(yscrollcommand=vbar.set)
+
+
     window = Canvas(root, width = 800, height = 800)
     window.grid()
+
     routers, table_values = draw_routers(window, neighbor_array)
     draw_link(window, routers)
     tree = draw_tables(root, table_values, routers)
