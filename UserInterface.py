@@ -54,7 +54,7 @@ def draw_routers(window, neighbor_array):
     routers = []
     alpha = math.pi/number_routers
     center = (400,350)
-    radius = 400 - size*2
+    radius = 400 - size*3
     table_values = {'row0':{}}
 
     i = 0
@@ -337,10 +337,10 @@ def main():
     # Parse arguments
     arg_parser = ArgumentParser(description='DV simualtor')
     arg_parser.add_argument('-r', '--router', dest='router', action='store',
-            default=10,
+            default=5,
             help='Number of routers')
     arg_parser.add_argument('-l', '--link', dest='link', action='store',
-            default=20,
+            default=7,
             help='Number of links')
     settings = arg_parser.parse_args()
     global network
