@@ -263,10 +263,10 @@ def draw_canvas(neighbor_array):
     #window.config(yscrollcommand=vbar.set)
 
     global global_clock
-    clock =Canvas(root, width = 100, height = 100)
-    clock.pack(side = "left")
-    clock.create_text(75,20,text = "Step: 0", tag="clock")
-    global_clock = clock
+    #clock =Canvas(root, width = 100, height = 100)
+    #clock.pack(side = "left")
+    #clock.create_text(75,20,text = "Step: 0", tag="clock")
+    #global_clock = clock
     global global_clock_var
     global_clock_var = 0
 
@@ -340,7 +340,7 @@ def leftKey(event):
         print(idd, router.routes)
 
     update_table(new_state)
-    draw_clock(-1)
+    #draw_clock(-1)
 
 def rightKey(event):
     print("Right key pressed")
@@ -350,7 +350,7 @@ def rightKey(event):
         print(idd, router.routes)
 
     update_table(new_state)
-    draw_clock(1)
+    #draw_clock(1)
 
 
 def main():
