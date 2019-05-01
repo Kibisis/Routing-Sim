@@ -12,6 +12,8 @@ from itertools import combinations
 
 network = None
 global_tree = None
+global_clock = None
+global_clock_var = 0
 
 class Router():
     def __init__(self, x1, y1, size, name, rno, neighbors=[]):
@@ -142,6 +144,13 @@ def create_network(frontend_routers):
             b_router2 = backend_routers[idx2]
             network.connect(b_router1, b_router2)
 
+def draw_clock(incr):
+    global global_clock_var
+    global_clock_var = global_clock_var + incr
+    global_clock.delete("clock")
+    text = "Steps: " + str(global_clock_var)
+    global_clock.create_text(75,20,text = text, tag = "clock")
+
 
 def draw_tables(root, table_values, routers):
     print("showing tables")
@@ -253,6 +262,14 @@ def draw_canvas(neighbor_array):
     #window.config(width=800,height=800)
     #window.config(yscrollcommand=vbar.set)
 
+    global global_clock
+    clock =Canvas(root, width = 100, height = 100)
+    clock.pack(side = "left")
+    clock.create_text(75,20,text = "Step: 0", tag="clock")
+    global_clock = clock
+    global global_clock_var
+    global_clock_var = 0
+
 
     window = Canvas(root, width = 800, height = 800)
     window.grid()
@@ -323,6 +340,7 @@ def leftKey(event):
         print(idd, router.routes)
 
     update_table(new_state)
+    draw_clock(-1)
 
 def rightKey(event):
     print("Right key pressed")
@@ -332,6 +350,7 @@ def rightKey(event):
         print(idd, router.routes)
 
     update_table(new_state)
+    draw_clock(1)
 
 
 def main():
