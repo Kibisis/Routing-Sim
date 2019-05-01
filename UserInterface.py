@@ -344,8 +344,8 @@ def main():
             help='Number of links')
     settings = arg_parser.parse_args()
     global network
-    network = Net.Network(name="Simulator", router_count=settings.router)
-    neighbor_array = create_links(settings.router, settings.link)
+    network = Net.Network(name="Simulator", router_count=int(settings.router))
+    neighbor_array = create_links(int(settings.router), int(settings.link))
     tree = draw_canvas(neighbor_array)
 
     # while True:
