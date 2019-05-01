@@ -49,12 +49,13 @@ class Router():
 def draw_routers(window, neighbor_array):
     #draw_routers(window, neighbor_array)
     # 800 x 8000
-    size = 50
     number_routers = len(neighbor_array)
+    size = max(50, 150 - 10*number_routers)
     routers = []
     alpha = math.pi/number_routers
     center = (400,350)
-    radius = 400 - size*3
+    length = max(-size*3, (-size*3 + 20*(10-number_routers)))
+    radius = 400 + length
     table_values = {'row0':{}}
 
     i = 0
@@ -170,7 +171,7 @@ def draw_tables(root, table_values, routers):
         columns.append(i)
     #print(columns)
     height = len(routers)+2
-    tree = ttk.Treeview(frame, columns=(columns), height=5, show="tree")#, anchor = 's')
+    tree = ttk.Treeview(frame, columns=(columns), height=7, show="tree")#, anchor = 's')
 
     tree.insert('', 'end', values=router_headers)
     tree.insert('', 'end', values=column_headers)
