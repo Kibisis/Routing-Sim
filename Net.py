@@ -4,9 +4,9 @@ import copy
 import queue
 
 class Network:
-    clock = 0
 
     def __init__(self, name="Network", router_count=0):
+        self.clock = 0
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
         self.links=set()
@@ -29,8 +29,8 @@ class Network:
 
         self.clock+=1
         if self.clock in self.past_networks:
-          return self.past_networks[self.clock]  
-        else:    
+          return self.past_networks[self.clock]
+        else:
             self.past_networks[self.clock] = copy.deepcopy(self)
 
         for id, router in self.routers.items(): #routers process data already present
