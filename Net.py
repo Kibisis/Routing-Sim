@@ -4,9 +4,9 @@ import copy
 import queue
 
 class Network:
+    clock = 0
 
     def __init__(self, name="Network", router_count=0):
-        self.clock = 0
         self.name=name # memorable way to differentiate them
         self.routers = {} # dict of all network routers {id: router}
         self.links=set()
