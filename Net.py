@@ -96,9 +96,12 @@ class Network:
     #         yield net.tick()
 
     def back(self):
-        self.clock -= 1
-        print(self.clock, self.past_networks)
-        return self.past_networks[self.clock]
+        if self.clock > 0:
+            self.clock -= 1
+            print(self.clock, self.past_networks)
+            return self.past_networks[self.clock]
+        else:
+            return self
 
 
 
