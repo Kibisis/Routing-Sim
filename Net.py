@@ -21,7 +21,7 @@ class Network:
         self.router_id+=1
 
     def tick(self):
-        if self.clock is 0:
+        if self.clock is 0 and self.clock not in self.past_networks:
             for id,router in self.routers.items(): #add initial positioning to all routers
                 if len(router.routes) is 0:
                     d=Data(0, router, router, {id:[-1,None]}, None)
